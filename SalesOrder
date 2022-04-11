@@ -1,0 +1,108 @@
+
+USE [MASTER] 
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'DemoDB')
+ALTER DATABASE DemoDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE
+ALTER DATABASE DemoDB SET SINGLE_USER
+DROP DATABASE [DemoDB] 
+GO
+
+CREATE DATABASE [DemoDB]
+GO
+USE [DemoDB]
+GO
+
+CREATE TYPE [Id]
+	FROM VARCHAR(6) NULL
+go
+
+CREATE TYPE [Nam]
+	FROM VARCHAR(20) NULL
+go
+
+CREATE TYPE [FrstNam]
+	FROM VARCHAR(20) NULL
+go
+
+CREATE TYPE [LstNam]
+	FROM VARCHAR(20) NULL
+go
+
+CREATE TYPE [Desc]
+	FROM VARCHAR(40) NULL
+go
+
+CREATE TYPE [Cd]
+	FROM INTEGER NULL
+go
+
+CREATE TYPE [property]
+	FROM CHAR(18) NULL
+go
+
+CREATE TABLE [tbl_cust]
+( 
+	[cust Id]            [Id]  NOT NULL ,
+	[cust FrstNam]       [FrstNam] ,
+	[cust LstNam]        [LstNam] ,
+	[Addr]               char(18)  NULL 
+)
+go
+
+CREATE TABLE [tbl_prdt]
+( 
+	[prdt Id]            [Id]  NOT NULL ,
+	[prdt Nam]           [Nam] ,
+	[Prc]                char(18)  NULL 
+)
+go
+
+CREATE TABLE [tbl_Sls Ordr]
+( 
+	[cust Id]            [Id] ,
+	[Sls Ordr Id]        [Id]  NOT NULL 
+)
+go
+
+CREATE TABLE [tbl_Sls Ordr Line]
+( 
+	[prdt Id]            [Id] ,
+	[Sls Ordr line Id]   [Id]  NOT NULL ,
+	[Sls Ordr Id]        [Id]  NOT NULL 
+)
+go
+
+ALTER TABLE [tbl_cust]
+	ADD CONSTRAINT [XPKCustomer] PRIMARY KEY  CLUSTERED ([cust Id] ASC)
+go
+
+ALTER TABLE [tbl_prdt]
+	ADD CONSTRAINT [XPKProduct] PRIMARY KEY  CLUSTERED ([prdt Id] ASC)
+go
+
+ALTER TABLE [tbl_Sls Ordr]
+	ADD CONSTRAINT [XPKsales Order] PRIMARY KEY  CLUSTERED ([Sls Ordr Id] ASC)
+go
+
+ALTER TABLE [tbl_Sls Ordr Line]
+	ADD CONSTRAINT [XPKSales Order Line] PRIMARY KEY  CLUSTERED ([Sls Ordr line Id] ASC,[Sls Ordr Id] ASC)
+go
+
+
+ALTER TABLE [tbl_Sls Ordr]
+	ADD CONSTRAINT [R_6] FOREIGN KEY ([cust Id]) REFERENCES [tbl_cust]([cust Id])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+
+ALTER TABLE [tbl_Sls Ordr Line]
+	ADD CONSTRAINT [R_8] FOREIGN KEY ([prdt Id]) REFERENCES [tbl_prdt]([prdt Id])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [tbl_Sls Ordr Line]
+	ADD CONSTRAINT [R_7] FOREIGN KEY ([Sls Ordr Id]) REFERENCES [tbl_Sls Ordr]([Sls Ordr Id])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
