@@ -1,0 +1,231 @@
+
+CREATE TABLE [CUST]
+( 
+	[CUST]               char(18)  NOT NULL ,
+	[CUST name]          char(18)  NULL 
+)
+go
+
+CREATE TABLE [CUST PROD]
+( 
+	[name]               char(18)  NULL 
+)
+go
+
+CREATE TABLE [PROD]
+( 
+	[PROD id]            char(18)  NOT NULL ,
+	[PROD name]          char(18)  NULL ,
+	[CUST]               char(18)  NOT NULL 
+)
+go
+
+ALTER TABLE [CUST]
+	ADD CONSTRAINT [XPKcustomer] PRIMARY KEY  CLUSTERED ([CUST] ASC)
+go
+
+ALTER TABLE [PROD]
+	ADD CONSTRAINT [XPKproduct] PRIMARY KEY  CLUSTERED ([PROD id] ASC,[CUST] ASC)
+go
+
+
+ALTER TABLE [PROD]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([CUST]) REFERENCES [CUST]([CUST])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+CREATE TRIGGER tD_customer ON CUST FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on CUST */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* CUST  PROD on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0000f5b6", PARENT_OWNER="", PARENT_TABLE="CUST"
+    CHILD_OWNER="", CHILD_TABLE="PROD"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST" */
+    IF EXISTS (
+      SELECT * FROM deleted,PROD
+      WHERE
+        /*  %JoinFKPK(PROD,deleted," = "," AND") */
+        PROD.CUST = deleted.CUST
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete CUST because PROD exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_customer ON CUST FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on CUST */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insCUST char(18),
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* CUST  PROD on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00010e1d", PARENT_OWNER="", PARENT_TABLE="CUST"
+    CHILD_OWNER="", CHILD_TABLE="PROD"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(CUST)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,PROD
+      WHERE
+        /*  %JoinFKPK(PROD,deleted," = "," AND") */
+        PROD.CUST = deleted.CUST
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update CUST because PROD exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_product ON PROD FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on PROD */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* CUST  PROD on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="000125ec", PARENT_OWNER="", PARENT_TABLE="CUST"
+    CHILD_OWNER="", CHILD_TABLE="PROD"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST" */
+    IF EXISTS (SELECT * FROM deleted,CUST
+      WHERE
+        /* %JoinFKPK(deleted,CUST," = "," AND") */
+        deleted.CUST = CUST.CUST AND
+        NOT EXISTS (
+          SELECT * FROM PROD
+          WHERE
+            /* %JoinFKPK(PROD,CUST," = "," AND") */
+            PROD.CUST = CUST.CUST
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last PROD because CUST exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_product ON PROD FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on PROD */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insPROD id char(18), 
+           @insCUST char(18),
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* CUST  PROD on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00014b22", PARENT_OWNER="", PARENT_TABLE="CUST"
+    CHILD_OWNER="", CHILD_TABLE="PROD"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(CUST)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,CUST
+        WHERE
+          /* %JoinFKPK(inserted,CUST) */
+          inserted.CUST = CUST.CUST
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update PROD because CUST does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
