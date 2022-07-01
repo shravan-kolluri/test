@@ -1,0 +1,3123 @@
+
+CREATE TABLE tbl_Addr
+(
+	AddrID_Col           INT  NOT NULL ,
+	AddrLine1_Col        NVARCHAR2(60) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	AddrLine2_Col        NVARCHAR2(60) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	Cty_Col              NVARCHAR2(30) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	StProvinceID_Col     INT  NOT NULL ,
+	PostalCd_Col         NVARCHAR2(15) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	SpatialLocation_Col  BLOB  NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_Address_AddressID ON tbl_Addr
+(AddrID_Col   ASC);
+
+ALTER TABLE tbl_Addr
+	ADD CONSTRAINT  PK_Address_AddressID PRIMARY KEY (AddrID_Col);
+
+CREATE UNIQUE INDEX AK_Address_rowguid ON tbl_Addr
+(rowguid_Col   ASC);
+
+CREATE UNIQUE INDEX IX_Address_AddressLine1_AddressLine2_City_StateProvinceID_PostalCode ON tbl_Addr
+(AddrLine1_Col   ASC,AddrLine2_Col   ASC,Cty_Col   ASC,StProvinceID_Col   ASC,PostalCd_Col   ASC);
+
+CREATE TABLE tbl_AddrTyp
+(
+	AddrTypID_Col        INT  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_AddressType_AddressTypeID ON tbl_AddrTyp
+(AddrTypID_Col   ASC);
+
+ALTER TABLE tbl_AddrTyp
+	ADD CONSTRAINT  PK_AddressType_AddressTypeID PRIMARY KEY (AddrTypID_Col);
+
+CREATE UNIQUE INDEX AK_AddressType_rowguid ON tbl_AddrTyp
+(rowguid_Col   ASC);
+
+CREATE UNIQUE INDEX AK_AddressType_Name ON tbl_AddrTyp
+(Nam_Col   ASC);
+
+CREATE TABLE tbl_BusinessEntity
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_BusinessEntity_BusinessEntityID ON tbl_BusinessEntity
+(BusinessEntityID_Col   ASC);
+
+ALTER TABLE tbl_BusinessEntity
+	ADD CONSTRAINT  PK_BusinessEntity_BusinessEntityID PRIMARY KEY (BusinessEntityID_Col);
+
+CREATE UNIQUE INDEX AK_BusinessEntity_rowguid ON tbl_BusinessEntity
+(rowguid_Col   ASC);
+
+CREATE TABLE tbl_BusinessEntityAddr
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	AddrID_Col           INT  NOT NULL ,
+	AddrTypID_Col        INT  NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_BusinessEntityAddress_BusinessEntityID_AddressID_AddressTypeID ON tbl_BusinessEntityAddr
+(BusinessEntityID_Col   ASC,AddrID_Col   ASC,AddrTypID_Col   ASC);
+
+ALTER TABLE tbl_BusinessEntityAddr
+	ADD CONSTRAINT  PK_BusinessEntityAddress_BusinessEntityID_AddressID_AddressTypeID PRIMARY KEY (BusinessEntityID_Col,AddrID_Col,AddrTypID_Col);
+
+CREATE UNIQUE INDEX AK_BusinessEntityAddress_rowguid ON tbl_BusinessEntityAddr
+(rowguid_Col   ASC);
+
+CREATE TABLE tbl_ContactTyp
+(
+	ContactTypID_Col     INT  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_ContactType_ContactTypeID ON tbl_ContactTyp
+(ContactTypID_Col   ASC);
+
+ALTER TABLE tbl_ContactTyp
+	ADD CONSTRAINT  PK_ContactType_ContactTypeID PRIMARY KEY (ContactTypID_Col);
+
+CREATE UNIQUE INDEX AK_ContactType_Name ON tbl_ContactTyp
+(Nam_Col   ASC);
+
+CREATE TABLE tbl_CountryRgn
+(
+	CountryRgnCd_Col     NVARCHAR2(3) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_CountryRegion_CountryRegionCode ON tbl_CountryRgn
+(CountryRgnCd_Col   ASC);
+
+ALTER TABLE tbl_CountryRgn
+	ADD CONSTRAINT  PK_CountryRegion_CountryRegionCode PRIMARY KEY (CountryRgnCd_Col);
+
+CREATE UNIQUE INDEX AK_CountryRegion_Name ON tbl_CountryRgn
+(Nam_Col   ASC);
+
+CREATE TABLE tbl_Department
+(
+	DepartmentID_Col     SMALLINT  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	GroupNam_Col         CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_Department_DepartmentID ON tbl_Department
+(DepartmentID_Col   ASC);
+
+ALTER TABLE tbl_Department
+	ADD CONSTRAINT  PK_Department_DepartmentID PRIMARY KEY (DepartmentID_Col);
+
+CREATE UNIQUE INDEX AK_Department_Name ON tbl_Department
+(Nam_Col   ASC);
+
+CREATE TABLE tbl_Person
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	PersonTyp_Col        NCHAR(2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL  CONSTRAINT  CK_Person_PersonType CHECK ([PersonType] IS NULL OR (upper([PersonType])='GC' OR upper([PersonType])='SP' OR upper([PersonType])='EM' OR upper([PersonType])='IN' OR upper([PersonType])='VC' OR upper([PersonType])='SC')),
+	NamStyle_Col         CHAR(18)  DEFAULT 0  NOT NULL ,
+	Ttle_Col             NVARCHAR2(8) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	FrstNam_Col          CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	MidNam_Col           CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	LstNam_Col           CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	Suffix_Col           NVARCHAR2(10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	EmailPromotion_Col   INT  DEFAULT 0  NOT NULL  CONSTRAINT  CK_Person_EmailPromotion CHECK (EmailPromotion_Col BETWEEN 0 AND 2),
+	AdditionalContactInfo_Col XMLType  NULL ,
+	Demographics_Col     XMLType  NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_Person_BusinessEntityID ON tbl_Person
+(BusinessEntityID_Col   ASC);
+
+ALTER TABLE tbl_Person
+	ADD CONSTRAINT  PK_Person_BusinessEntityID PRIMARY KEY (BusinessEntityID_Col);
+
+CREATE UNIQUE INDEX AK_Person_rowguid ON tbl_Person
+(rowguid_Col   ASC);
+
+CREATE INDEX IX_Person_LastName_FirstName_MiddleName ON tbl_Person
+(LstNam_Col   ASC,FrstNam_Col   ASC,MidNam_Col   ASC);
+
+CREATE TABLE tbl_BusinessEntityContact
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	PersonID_Col         INT  NOT NULL ,
+	ContactTypID_Col     INT  NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_BusinessEntityContact_BusinessEntityID_PersonID_ContactTypeID ON tbl_BusinessEntityContact
+(BusinessEntityID_Col   ASC,PersonID_Col   ASC,ContactTypID_Col   ASC);
+
+ALTER TABLE tbl_BusinessEntityContact
+	ADD CONSTRAINT  PK_BusinessEntityContact_BusinessEntityID_PersonID_ContactTypeID PRIMARY KEY (BusinessEntityID_Col,PersonID_Col,ContactTypID_Col);
+
+CREATE UNIQUE INDEX AK_BusinessEntityContact_rowguid ON tbl_BusinessEntityContact
+(rowguid_Col   ASC);
+
+CREATE TABLE tbl_EmailAddr
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	EmailAddrID_Col      INT  NOT NULL ,
+	EmailAddr_Col        NVARCHAR2(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_EmailAddress_BusinessEntityID_EmailAddressID ON tbl_EmailAddr
+(BusinessEntityID_Col   ASC,EmailAddrID_Col   ASC);
+
+ALTER TABLE tbl_EmailAddr
+	ADD CONSTRAINT  PK_EmailAddress_BusinessEntityID_EmailAddressID PRIMARY KEY (BusinessEntityID_Col,EmailAddrID_Col);
+
+CREATE INDEX IX_EmailAddress_EmailAddress ON tbl_EmailAddr
+(EmailAddr_Col   ASC);
+
+CREATE TABLE tbl_Emp
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	NationalIDNbr_Col    NVARCHAR2(15) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	LoginID_Col          NVARCHAR2(256) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	OrganizationNode_Col XMLType  NULL ,
+	OrganizationLvL_Col  CHAR(18)  NULL ,
+	JobTtle_Col          NVARCHAR2(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	BirthDt_Col          DATE  NOT NULL  CONSTRAINT  CK_Employee_BirthDate CHECK (BirthDt_Col BETWEEN '1930-01-01' AND 'dateadd(year,(-18),getdate'),
+	MaritalStat_Col      NCHAR(1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL  CONSTRAINT  CK_Employee_MaritalStatus CHECK (MaritalStat_Col IN ('S', 'M')),
+	GEnder_Col           NCHAR(1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL  CONSTRAINT  CK_Employee_Gender CHECK (GEnder_Col IN ('F', 'M')),
+	HireDt_Col           DATE  NOT NULL  CONSTRAINT  CK_Employee_HireDate CHECK (HireDt_Col BETWEEN '1996-07-01' AND 'dateadd(day,(1),getdate'),
+	SalariedFlag_Col     CHAR(18)  DEFAULT 1  NOT NULL ,
+	VacationHrs_Col      SMALLINT  DEFAULT 0  NOT NULL  CONSTRAINT  CK_Employee_VacationHours CHECK (VacationHrs_Col BETWEEN -40 AND 240),
+	SickLeaveHrs_Col     SMALLINT  DEFAULT 0  NOT NULL  CONSTRAINT  CK_Employee_SickLeaveHours CHECK (SickLeaveHrs_Col BETWEEN 0 AND 120),
+	CurrFlag_Col         CHAR(18)  DEFAULT 1  NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_Employee_BusinessEntityID ON tbl_Emp
+(BusinessEntityID_Col   ASC);
+
+ALTER TABLE tbl_Emp
+	ADD CONSTRAINT  PK_Employee_BusinessEntityID PRIMARY KEY (BusinessEntityID_Col);
+
+CREATE UNIQUE INDEX AK_Employee_LoginID ON tbl_Emp
+(LoginID_Col   ASC);
+
+CREATE UNIQUE INDEX AK_Employee_NationalIDNumber ON tbl_Emp
+(NationalIDNbr_Col   ASC);
+
+CREATE UNIQUE INDEX AK_Employee_rowguid ON tbl_Emp
+(rowguid_Col   ASC);
+
+CREATE INDEX IX_Employee_OrganizationNode ON tbl_Emp
+(OrganizationNode_Col   ASC);
+
+CREATE INDEX IX_Employee_OrganizationLevel_OrganizationNode ON tbl_Emp
+(OrganizationLvL_Col   ASC,OrganizationNode_Col   ASC);
+
+CREATE TABLE tbl_EmpDepartmentHist
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	DepartmentID_Col     SMALLINT  NOT NULL ,
+	ShiftID_Col          SMALLINT  NOT NULL ,
+	StrtDt_Col           DATE  NOT NULL ,
+	EndDt_Col            DATE  NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL ,
+CONSTRAINT CK_EmployeeDepartmentHistory_EndDate CHECK ( [EndDate]>=[StartDate] OR [EndDate] IS NULL )
+);
+
+CREATE UNIQUE INDEX PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_DepartmentID ON tbl_EmpDepartmentHist
+(BusinessEntityID_Col   ASC,StrtDt_Col   ASC,DepartmentID_Col   ASC,ShiftID_Col   ASC);
+
+ALTER TABLE tbl_EmpDepartmentHist
+	ADD CONSTRAINT  PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_DepartmentID PRIMARY KEY (BusinessEntityID_Col,StrtDt_Col,DepartmentID_Col,ShiftID_Col);
+
+CREATE INDEX IX_EmployeeDepartmentHistory_ShiftID ON tbl_EmpDepartmentHist
+(ShiftID_Col   ASC);
+
+CREATE TABLE tbl_EmpPayHist
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	RateChangeDt_Col     DATE  NOT NULL ,
+	Rate_Col12           DECIMAL(19,4)  NOT NULL  CONSTRAINT  CK_EmployeePayHistory_Rate CHECK (Rate_Col12 BETWEEN 6.50 AND 200.00),
+	PayFrequency_Col     SMALLINT  NOT NULL  CONSTRAINT  CK_EmployeePayHistory_PayFrequency CHECK (PayFrequency_Col IN (2, 1)),
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_EmployeePayHistory_BusinessEntityID_RateChangeDate ON tbl_EmpPayHist
+(BusinessEntityID_Col   ASC,RateChangeDt_Col   ASC);
+
+ALTER TABLE tbl_EmpPayHist
+	ADD CONSTRAINT  PK_EmployeePayHistory_BusinessEntityID_RateChangeDate PRIMARY KEY (BusinessEntityID_Col,RateChangeDt_Col);
+
+CREATE TABLE tbl_JobCandiDt
+(
+	JobCandiDtID_Col     INT  NOT NULL ,
+	BusinessEntityID_Col INT  NULL ,
+	Resume_Col           XMLType  NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_JobCandidate_JobCandidateID ON tbl_JobCandiDt
+(JobCandiDtID_Col   ASC);
+
+ALTER TABLE tbl_JobCandiDt
+	ADD CONSTRAINT  PK_JobCandidate_JobCandidateID PRIMARY KEY (JobCandiDtID_Col);
+
+CREATE TABLE tbl_PersonPhn
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	PhnNbr_Col           CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	PhnNbrTypID_Col      INT  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_PersonPhone_BusinessEntityID_PhoneNumber_PhoneNumberTypeID ON tbl_PersonPhn
+(BusinessEntityID_Col   ASC,PhnNbr_Col   ASC,PhnNbrTypID_Col   ASC);
+
+ALTER TABLE tbl_PersonPhn
+	ADD CONSTRAINT  PK_PersonPhone_BusinessEntityID_PhoneNumber_PhoneNumberTypeID PRIMARY KEY (BusinessEntityID_Col,PhnNbr_Col,PhnNbrTypID_Col);
+
+CREATE INDEX IX_PersonPhone_PhoneNumber ON tbl_PersonPhn
+(PhnNbr_Col   ASC);
+
+CREATE TABLE tbl_PhnNbrTyp
+(
+	PhnNbrTypID_Col      INT  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_PhoneNumberType_PhoneNumberTypeID ON tbl_PhnNbrTyp
+(PhnNbrTypID_Col   ASC);
+
+ALTER TABLE tbl_PhnNbrTyp
+	ADD CONSTRAINT  PK_PhoneNumberType_PhoneNumberTypeID PRIMARY KEY (PhnNbrTypID_Col);
+
+CREATE TABLE tbl_pwd
+(
+	BusinessEntityID_Col INT  NOT NULL ,
+	PasswordHash_Col     VARCHAR2(128) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	PasswordSalt_Col     VARCHAR2(10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL ,
+	OTP_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NULL 
+);
+
+CREATE UNIQUE INDEX PK_Password_BusinessEntityID ON tbl_pwd
+(BusinessEntityID_Col   ASC);
+
+ALTER TABLE tbl_pwd
+	ADD CONSTRAINT  PK_Password_BusinessEntityID PRIMARY KEY (BusinessEntityID_Col);
+
+CREATE TABLE tbl_Shift
+(
+	ShiftID_Col          SMALLINT  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	StrtTime_Col         TIMESTAMP  NOT NULL ,
+	EndTime_Col          TIMESTAMP  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL ,
+	TestCol_Col          INT  NOT NULL ,
+	MobileNo_Col         CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	Mobile02_Col         NCHAR(9) COLLATE SQL_Latin1_General_CP1_CI_AS NULL 
+);
+
+CREATE UNIQUE INDEX PK_Shift_ShiftID ON tbl_Shift
+(ShiftID_Col   ASC);
+
+ALTER TABLE tbl_Shift
+	ADD CONSTRAINT  PK_Shift_ShiftID PRIMARY KEY (ShiftID_Col);
+
+CREATE UNIQUE INDEX AK_Shift_Name ON tbl_Shift
+(Nam_Col   ASC);
+
+CREATE UNIQUE INDEX AK_Shift_StartTime_EndTime ON tbl_Shift
+(StrtTime_Col   ASC,EndTime_Col   ASC);
+
+CREATE TABLE tbl_specl_char_test
+(
+	primary_col__Col     CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	col_2_Col            CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	new_mobileNo_Col     CHAR(20)  DEFAULT '0000000'  NULL ,
+	BusinessEntityID_Col INT  NOT NULL 
+);
+
+CREATE UNIQUE INDEX XPKspecl_char_test ON tbl_specl_char_test
+(primary_col__Col   ASC,BusinessEntityID_Col   ASC);
+
+ALTER TABLE tbl_specl_char_test
+	ADD CONSTRAINT  XPKspecl_char_test PRIMARY KEY (primary_col__Col,BusinessEntityID_Col);
+
+CREATE TABLE tbl_StProvince
+(
+	StProvinceID_Col     INT  NOT NULL ,
+	StProvinceCd_Col     NCHAR(3) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	CountryRgnCd_Col     NVARCHAR2(3) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	IsOnlyStProvinceFlag_Col CHAR(18)  DEFAULT 1  NOT NULL ,
+	Nam_Col              CHAR(18) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	TerriToryID_Col      INT  NOT NULL ,
+	rowguid_Col          ROWID  DEFAULT newid()  NOT NULL ,
+	ModifiedDt_Col       DATE  DEFAULT getdate()  NOT NULL 
+);
+
+CREATE UNIQUE INDEX PK_StateProvince_StateProvinceID ON tbl_StProvince
+(StProvinceID_Col   ASC);
+
+ALTER TABLE tbl_StProvince
+	ADD CONSTRAINT  PK_StateProvince_StateProvinceID PRIMARY KEY (StProvinceID_Col);
+
+CREATE UNIQUE INDEX AK_StateProvince_Name ON tbl_StProvince
+(Nam_Col   ASC);
+
+CREATE UNIQUE INDEX AK_StateProvince_StateProvinceCode_CountryRegionCode ON tbl_StProvince
+(StProvinceCd_Col   ASC,CountryRgnCd_Col   ASC);
+
+CREATE UNIQUE INDEX AK_StateProvince_rowguid ON tbl_StProvince
+(rowguid_Col   ASC);
+
+CREATE TABLE tbl_tbl_E_21_1
+(
+	new_col_Coly         CHAR(18)  NULL 
+);
+
+CREATE TABLE tbl_tbl_E_21_2
+(
+	new_col_Coly         CHAR(18)  NULL 
+);
+
+CREATE VIEW [Person].[vAdditionalContactInfo] AS  SELECT [BusinessEntityID], [FirstName], [MiddleName], [LastName],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:telephoneNumber)[1]/act:number' , 'nvarchar(50)' )  AS [TelephoneNumber],  ltrim( rtrim( [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:telephoneNumber/act:SpecialInstructions/text())[1]' , 'nvarchar(max)' ) ) )  AS [TelephoneSpecialInstructions],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes";
+        (act:homePostalAddress/act:Street)[1]' , 'nvarchar(50)' )  AS [Street],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:homePostalAddress/act:City)[1]' , 'nvarchar(50)' )  AS [City],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:homePostalAddress/act:StateProvince)[1]' , 'nvarchar(50)' )  AS [StateProvince],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:homePostalAddress/act:PostalCode)[1]' , 'nvarchar(50)' )  AS [PostalCode],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:homePostalAddress/act:CountryRegion)[1]' , 'nvarchar(50)' )  AS [CountryRegion],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:homePostalAddress/act:SpecialInstructions/text())[1]' , 'nvarchar(max)' )  AS [HomeAddressSpecialInstructions],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:eMail/act:eMailAddress)[1]' , 'nvarchar(128)' )  AS [EMailAddress],  ltrim( rtrim( [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:eMail/act:SpecialInstructions/text())[1]' , 'nvarchar(max)' ) ) )  AS [EMailSpecialInstructions],  [ContactInfo].ref.value( N'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+        declare namespace act="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactTypes"; 
+        (act:eMail/act:SpecialInstructions/act:telephoneNumber/act:number)[1]' , 'nvarchar(50)' )  AS [EMailTelephoneNumber], [rowguid], [ModifiedDate] FROM Person.Person   OUTER APPLY   AdditionalContactInfo.nodes( 'declare namespace ci="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ContactInfo"; 
+    /ci:AdditionalContactInfo' ) AS ContactInfo (ref) WHERE [AdditionalContactInfo] IS NOT NULL;
+
+CREATE VIEW [HumanResources].[vEmployee] AS  SELECT e.[BusinessEntityID], p.[Title], p.[FirstName], p.[MiddleName], p.[LastName], p.[Suffix], e.[JobTitle], pp.[PhoneNumber], pnt.[Name] AS [PhoneNumberType], ea.[EmailAddress], p.[EmailPromotion], a.[AddressLine1], a.[AddressLine2], a.[City], sp.[Name] AS [StateProvinceName], a.[PostalCode], cr.[Name] AS [CountryRegionName], p.[AdditionalContactInfo] FROM HumanResources.Employee AS e   INNER JOIN   Person.Person AS p ON p.[BusinessEntityID] = e.[BusinessEntityID]   INNER JOIN   Person.BusinessEntityAddress AS bea ON bea.[BusinessEntityID] = e.[BusinessEntityID]   INNER JOIN   Person.Address AS a ON a.[AddressID] = bea.[AddressID]   INNER JOIN   Person.StateProvince AS sp ON sp.[StateProvinceID] = a.[StateProvinceID]   INNER JOIN   Person.CountryRegion AS cr ON cr.[CountryRegionCode] = sp.[CountryRegionCode]   LEFT OUTER JOIN   Person.PersonPhone AS pp ON pp.BusinessEntityID = p.[BusinessEntityID]   LEFT OUTER JOIN   Person.PhoneNumberType AS pnt ON pp.[PhoneNumberTypeID] = pnt.[PhoneNumberTypeID]   LEFT OUTER JOIN   Person.EmailAddress AS ea ON p.[BusinessEntityID] = ea.[BusinessEntityID];
+
+CREATE VIEW [HumanResources].[vEmployeeDepartment] AS  SELECT e.[BusinessEntityID], p.[Title], p.[FirstName], p.[MiddleName], p.[LastName], p.[Suffix], e.[JobTitle], d.[Name] AS [Department], d.[GroupName], edh.[StartDate] FROM HumanResources.Employee AS e   INNER JOIN   Person.Person AS p ON p.[BusinessEntityID] = e.[BusinessEntityID]   INNER JOIN   HumanResources.EmployeeDepartmentHistory AS edh ON e.[BusinessEntityID] = edh.[BusinessEntityID]   INNER JOIN   HumanResources.Department AS d ON edh.[DepartmentID] = d.[DepartmentID] WHERE edh.EndDate IS NULL;
+
+CREATE VIEW [HumanResources].[vEmployeeDepartmentHistory] AS  SELECT e.[BusinessEntityID], p.[Title], p.[FirstName], p.[MiddleName], p.[LastName], p.[Suffix], s.[Name] AS [Shift], d.[Name] AS [Department], d.[GroupName], edh.[StartDate], edh.[EndDate] FROM HumanResources.Employee AS e   INNER JOIN   Person.Person AS p ON p.[BusinessEntityID] = e.[BusinessEntityID]   INNER JOIN   HumanResources.EmployeeDepartmentHistory AS edh ON e.[BusinessEntityID] = edh.[BusinessEntityID]   INNER JOIN   HumanResources.Department AS d ON edh.[DepartmentID] = d.[DepartmentID]   INNER JOIN   HumanResources.Shift AS s ON s.[ShiftID] = edh.[ShiftID];
+
+CREATE VIEW [HumanResources].[vJobCandidate] AS  SELECT jc.[JobCandidateID], jc.[BusinessEntityID],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/Name/Name.Prefix)[1]' , 'nvarchar(30)' )  AS [Name.Prefix],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume";
+        (/Resume/Name/Name.First)[1]' , 'nvarchar(30)' )  AS [Name.First],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/Name/Name.Middle)[1]' , 'nvarchar(30)' )  AS [Name.Middle],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/Name/Name.Last)[1]' , 'nvarchar(30)' )  AS [Name.Last],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/Name/Name.Suffix)[1]' , 'nvarchar(30)' )  AS [Name.Suffix],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/Skills)[1]' , 'nvarchar(max)' )  AS [Skills],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Address/Addr.Type)[1]' , 'nvarchar(30)' )  AS [Addr.Type],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Address/Addr.Location/Location/Loc.CountryRegion)[1]' , 'nvarchar(100)' )  AS [Addr.Loc.CountryRegion],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Address/Addr.Location/Location/Loc.State)[1]' , 'nvarchar(100)' )  AS [Addr.Loc.State],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Address/Addr.Location/Location/Loc.City)[1]' , 'nvarchar(100)' )  AS [Addr.Loc.City],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Address/Addr.PostalCode)[1]' , 'nvarchar(20)' )  AS [Addr.PostalCode],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/EMail)[1]' , 'nvarchar(max)' )  AS [EMail],  [Resume].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (/Resume/WebSite)[1]' , 'nvarchar(max)' )  AS [WebSite], jc.[ModifiedDate] FROM HumanResources.JobCandidate AS jc   CROSS APPLY   jc.Resume.nodes( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+    /Resume' ) AS Resume (ref);
+
+CREATE VIEW [HumanResources].[vJobCandidateEmployment] AS  SELECT jc.[JobCandidateID],  CONVERT(datetime,  REPLACE(  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.StartDate)[1]' , 'nvarchar(20)' )  , 'Z' , '' ) , 101) AS [Emp.StartDate],  CONVERT(datetime,  REPLACE(  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.EndDate)[1]' , 'nvarchar(20)' )  , 'Z' , '' ) , 101) AS [Emp.EndDate],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.OrgName)[1]' , 'nvarchar(100)' )  AS [Emp.OrgName],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.JobTitle)[1]' , 'nvarchar(100)' )  AS [Emp.JobTitle],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.Responsibility)[1]' , 'nvarchar(max)' )  AS [Emp.Responsibility],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.FunctionCategory)[1]' , 'nvarchar(max)' )  AS [Emp.FunctionCategory],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.IndustryCategory)[1]' , 'nvarchar(max)' )  AS [Emp.IndustryCategory],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.Location/Location/Loc.CountryRegion)[1]' , 'nvarchar(max)' )  AS [Emp.Loc.CountryRegion],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.Location/Location/Loc.State)[1]' , 'nvarchar(max)' )  AS [Emp.Loc.State],  [Employment].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Emp.Location/Location/Loc.City)[1]' , 'nvarchar(max)' )  AS [Emp.Loc.City] FROM HumanResources.JobCandidate AS jc   CROSS APPLY   jc.Resume.nodes( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+    /Resume/Employment' ) AS Employment (ref);
+
+CREATE VIEW [HumanResources].[vJobCandidateEducation] AS  SELECT jc.[JobCandidateID],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Level)[1]' , 'nvarchar(max)' )  AS [Edu.Level],  CONVERT(datetime,  REPLACE(  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.StartDate)[1]' , 'nvarchar(20)' )  , 'Z' , '' ) , 101) AS [Edu.StartDate],  CONVERT(datetime,  REPLACE(  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.EndDate)[1]' , 'nvarchar(20)' )  , 'Z' , '' ) , 101) AS [Edu.EndDate],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Degree)[1]' , 'nvarchar(50)' )  AS [Edu.Degree],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Major)[1]' , 'nvarchar(50)' )  AS [Edu.Major],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Minor)[1]' , 'nvarchar(50)' )  AS [Edu.Minor],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.GPA)[1]' , 'nvarchar(5)' )  AS [Edu.GPA],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.GPAScale)[1]' , 'nvarchar(5)' )  AS [Edu.GPAScale],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.School)[1]' , 'nvarchar(100)' )  AS [Edu.School],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Location/Location/Loc.CountryRegion)[1]' , 'nvarchar(100)' )  AS [Edu.Loc.CountryRegion],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Location/Location/Loc.State)[1]' , 'nvarchar(100)' )  AS [Edu.Loc.State],  [Education].ref.value( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+        (Edu.Location/Location/Loc.City)[1]' , 'nvarchar(100)' )  AS [Edu.Loc.City] FROM HumanResources.JobCandidate AS jc   CROSS APPLY   jc.Resume.nodes( N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/Resume"; 
+    /Resume/Education' ) AS [Education] (ref);
+
+CREATE VIEW [Person].[vStateProvinceCountryRegion] WITH SCHEMABINDING  AS  SELECT sp.[StateProvinceID], sp.[StateProvinceCode], sp.[IsOnlyStateProvinceFlag], sp.[Name] AS [StateProvinceName], sp.[TerritoryID], cr.[CountryRegionCode], cr.[Name] AS [CountryRegionName] FROM Person.StateProvince AS sp   INNER JOIN   Person.CountryRegion AS cr ON sp.[CountryRegionCode] = cr.[CountryRegionCode];
+
+ALTER TABLE tbl_Addr
+	ADD (
+CONSTRAINT FK_Address_StateProvince_StateProvinceID FOREIGN KEY (StProvinceID_Col) REFERENCES tbl_StProvince (StProvinceID_Col));
+
+ALTER TABLE tbl_BusinessEntityAddr
+	ADD (
+CONSTRAINT FK_BusinessEntityAddress_Address_AddressID FOREIGN KEY (AddrID_Col) REFERENCES tbl_Addr (AddrID_Col));
+
+ALTER TABLE tbl_BusinessEntityAddr
+	ADD (
+CONSTRAINT FK_BusinessEntityAddress_AddressType_AddressTypeID FOREIGN KEY (AddrTypID_Col) REFERENCES tbl_AddrTyp (AddrTypID_Col));
+
+ALTER TABLE tbl_BusinessEntityAddr
+	ADD (
+CONSTRAINT FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_BusinessEntity (BusinessEntityID_Col));
+
+ALTER TABLE tbl_Person
+	ADD (
+CONSTRAINT FK_Person_BusinessEntity_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_BusinessEntity (BusinessEntityID_Col));
+
+ALTER TABLE tbl_BusinessEntityContact
+	ADD (
+CONSTRAINT FK_BusinessEntityContact_Person_PersonID FOREIGN KEY (PersonID_Col) REFERENCES tbl_Person (BusinessEntityID_Col));
+
+ALTER TABLE tbl_BusinessEntityContact
+	ADD (
+CONSTRAINT FK_BusinessEntityContact_ContactType_ContactTypeID FOREIGN KEY (ContactTypID_Col) REFERENCES tbl_ContactTyp (ContactTypID_Col));
+
+ALTER TABLE tbl_BusinessEntityContact
+	ADD (
+CONSTRAINT FK_BusinessEntityContact_BusinessEntity_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_BusinessEntity (BusinessEntityID_Col));
+
+ALTER TABLE tbl_EmailAddr
+	ADD (
+CONSTRAINT FK_EmailAddress_Person_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Person (BusinessEntityID_Col));
+
+ALTER TABLE tbl_Emp
+	ADD (
+CONSTRAINT FK_Employee_Person_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Person (BusinessEntityID_Col));
+
+ALTER TABLE tbl_EmpDepartmentHist
+	ADD (
+CONSTRAINT FK_EmployeeDepartmentHistory_Department_DepartmentID FOREIGN KEY (DepartmentID_Col) REFERENCES tbl_Department (DepartmentID_Col));
+
+ALTER TABLE tbl_EmpDepartmentHist
+	ADD (
+CONSTRAINT FK_EmployeeDepartmentHistory_Employee_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Emp (BusinessEntityID_Col));
+
+ALTER TABLE tbl_EmpPayHist
+	ADD (
+CONSTRAINT FK_EmployeePayHistory_Employee_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Emp (BusinessEntityID_Col));
+
+ALTER TABLE tbl_JobCandiDt
+	ADD (
+CONSTRAINT FK_JobCandidate_Employee_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Emp (BusinessEntityID_Col));
+
+ALTER TABLE tbl_PersonPhn
+	ADD (
+CONSTRAINT FK_PersonPhone_Person_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Person (BusinessEntityID_Col));
+
+ALTER TABLE tbl_PersonPhn
+	ADD (
+CONSTRAINT FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID FOREIGN KEY (PhnNbrTypID_Col) REFERENCES tbl_PhnNbrTyp (PhnNbrTypID_Col));
+
+ALTER TABLE tbl_pwd
+	ADD (
+CONSTRAINT FK_Password_Person_BusinessEntityID FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_Person (BusinessEntityID_Col));
+
+ALTER TABLE tbl_specl_char_test
+	ADD (
+CONSTRAINT R_43 FOREIGN KEY (BusinessEntityID_Col) REFERENCES tbl_pwd (BusinessEntityID_Col));
+
+ALTER TABLE tbl_StProvince
+	ADD (
+CONSTRAINT FK_StateProvince_CountryRegion_CountryRegionCode FOREIGN KEY (CountryRgnCd_Col) REFERENCES tbl_CountryRgn (CountryRgnCd_Col));
+
+CREATE TRIGGER tD_----TableName ON tbl_Addr FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_Addr */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Addr  tbl_BusinessEntityAddr on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0002a536", PARENT_OWNER="", PARENT_TABLE="tbl_Addr"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_Address_AddressID", FK_COLUMNS="AddrID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.AddrID_Col = deleted.AddrID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Addr because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_StProvince  tbl_Addr on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_StProvince"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Addr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Address_StateProvince_StateProvinceID", FK_COLUMNS="StProvinceID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_StProvince
+      WHERE
+        /* %JoinFKPK(deleted,tbl_StProvince," = "," AND") */
+        deleted.StProvinceID_Col = tbl_StProvince.StProvinceID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_Addr
+          WHERE
+            /* %JoinFKPK(tbl_Addr,tbl_StProvince," = "," AND") */
+            tbl_Addr.StProvinceID_Col = tbl_StProvince.StProvinceID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_Addr because tbl_StProvince exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_Addr FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_Addr */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insAddrID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Addr  tbl_BusinessEntityAddr on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0002d7b0", PARENT_OWNER="", PARENT_TABLE="tbl_Addr"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_Address_AddressID", FK_COLUMNS="AddrID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(AddrID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.AddrID_Col = deleted.AddrID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Addr because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_StProvince  tbl_Addr on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_StProvince"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Addr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Address_StateProvince_StateProvinceID", FK_COLUMNS="StProvinceID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(StProvinceID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_StProvince
+        WHERE
+          /* %JoinFKPK(inserted,tbl_StProvince) */
+          inserted.StProvinceID_Col = tbl_StProvince.StProvinceID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_Addr because tbl_StProvince does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_AddrTyp FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_AddrTyp */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_AddrTyp  tbl_BusinessEntityAddr on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00014e8b", PARENT_OWNER="", PARENT_TABLE="tbl_AddrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_AddressType_AddressTypeID", FK_COLUMNS="AddrTypID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.AddrTypID_Col = deleted.AddrTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_AddrTyp because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_AddrTyp FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_AddrTyp */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insAddrTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_AddrTyp  tbl_BusinessEntityAddr on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00016c51", PARENT_OWNER="", PARENT_TABLE="tbl_AddrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_AddressType_AddressTypeID", FK_COLUMNS="AddrTypID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(AddrTypID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.AddrTypID_Col = deleted.AddrTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_AddrTyp because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_BusinessEntity FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_BusinessEntity */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_BusinessEntityContact on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0003e423", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_BusinessEntity because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_BusinessEntityAddr on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_BusinessEntity because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_Person on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Person"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Person_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Person
+      WHERE
+        /*  %JoinFKPK(tbl_Person,deleted," = "," AND") */
+        tbl_Person.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_BusinessEntity because tbl_Person exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_BusinessEntity FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_BusinessEntity */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_BusinessEntityContact on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00043673", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_BusinessEntity because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_BusinessEntityAddr on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityAddr
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityAddr,deleted," = "," AND") */
+        tbl_BusinessEntityAddr.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_BusinessEntity because tbl_BusinessEntityAddr exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_Person on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Person"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Person_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Person
+      WHERE
+        /*  %JoinFKPK(tbl_Person,deleted," = "," AND") */
+        tbl_Person.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_BusinessEntity because tbl_Person exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_BusinessEntityAddr FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_BusinessEntityAddr */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_BusinessEntityAddr on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0004c49a", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_BusinessEntity
+      WHERE
+        /* %JoinFKPK(deleted,tbl_BusinessEntity," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityAddr
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityAddr,tbl_BusinessEntity," = "," AND") */
+            tbl_BusinessEntityAddr.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityAddr because tbl_BusinessEntity exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_AddrTyp  tbl_BusinessEntityAddr on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_AddrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_AddressType_AddressTypeID", FK_COLUMNS="AddrTypID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_AddrTyp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_AddrTyp," = "," AND") */
+        deleted.AddrTypID_Col = tbl_AddrTyp.AddrTypID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityAddr
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityAddr,tbl_AddrTyp," = "," AND") */
+            tbl_BusinessEntityAddr.AddrTypID_Col = tbl_AddrTyp.AddrTypID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityAddr because tbl_AddrTyp exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Addr  tbl_BusinessEntityAddr on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Addr"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_Address_AddressID", FK_COLUMNS="AddrID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Addr
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Addr," = "," AND") */
+        deleted.AddrID_Col = tbl_Addr.AddrID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityAddr
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityAddr,tbl_Addr," = "," AND") */
+            tbl_BusinessEntityAddr.AddrID_Col = tbl_Addr.AddrID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityAddr because tbl_Addr exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_BusinessEntityAddr FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_BusinessEntityAddr */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insAddrID_Col INT, 
+           @insAddrTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_BusinessEntityAddr on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0004c2c4", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_BusinessEntity
+        WHERE
+          /* %JoinFKPK(inserted,tbl_BusinessEntity) */
+          inserted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityAddr because tbl_BusinessEntity does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_AddrTyp  tbl_BusinessEntityAddr on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_AddrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_AddressType_AddressTypeID", FK_COLUMNS="AddrTypID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(AddrTypID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_AddrTyp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_AddrTyp) */
+          inserted.AddrTypID_Col = tbl_AddrTyp.AddrTypID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityAddr because tbl_AddrTyp does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Addr  tbl_BusinessEntityAddr on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Addr"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityAddress_Address_AddressID", FK_COLUMNS="AddrID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(AddrID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Addr
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Addr) */
+          inserted.AddrID_Col = tbl_Addr.AddrID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityAddr because tbl_Addr does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_ContactTyp FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_ContactTyp */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_ContactTyp  tbl_BusinessEntityContact on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00016aca", PARENT_OWNER="", PARENT_TABLE="tbl_ContactTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_ContactType_ContactTypeID", FK_COLUMNS="ContactTypID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.ContactTypID_Col = deleted.ContactTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_ContactTyp because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_ContactTyp FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_ContactTyp */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insContactTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_ContactTyp  tbl_BusinessEntityContact on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00018576", PARENT_OWNER="", PARENT_TABLE="tbl_ContactTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_ContactType_ContactTypeID", FK_COLUMNS="ContactTypID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(ContactTypID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.ContactTypID_Col = deleted.ContactTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_ContactTyp because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_CountryRgn FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_CountryRgn */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_CountryRgn  tbl_StProvince on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00013d17", PARENT_OWNER="", PARENT_TABLE="tbl_CountryRgn"
+    CHILD_OWNER="", CHILD_TABLE="tbl_StProvince"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_StateProvince_CountryRegion_CountryRegionCode", FK_COLUMNS="CountryRgnCd_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_StProvince
+      WHERE
+        /*  %JoinFKPK(tbl_StProvince,deleted," = "," AND") */
+        tbl_StProvince.CountryRgnCd_Col = deleted.CountryRgnCd_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_CountryRgn because tbl_StProvince exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_CountryRgn FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_CountryRgn */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insCountryRgnCd_Col NVARCHAR2(3),
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_CountryRgn  tbl_StProvince on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001557b", PARENT_OWNER="", PARENT_TABLE="tbl_CountryRgn"
+    CHILD_OWNER="", CHILD_TABLE="tbl_StProvince"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_StateProvince_CountryRegion_CountryRegionCode", FK_COLUMNS="CountryRgnCd_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(CountryRgnCd_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_StProvince
+      WHERE
+        /*  %JoinFKPK(tbl_StProvince,deleted," = "," AND") */
+        tbl_StProvince.CountryRgnCd_Col = deleted.CountryRgnCd_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_CountryRgn because tbl_StProvince exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_Department FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_Department */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Department  tbl_EmpDepartmentHist on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00015a45", PARENT_OWNER="", PARENT_TABLE="tbl_Department"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmpDepartmentHist
+      WHERE
+        /*  %JoinFKPK(tbl_EmpDepartmentHist,deleted," = "," AND") */
+        tbl_EmpDepartmentHist.DepartmentID_Col = deleted.DepartmentID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Department because tbl_EmpDepartmentHist exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_Department FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_Department */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insDepartmentID_Col SMALLINT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Department  tbl_EmpDepartmentHist on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="000182da", PARENT_OWNER="", PARENT_TABLE="tbl_Department"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(DepartmentID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmpDepartmentHist
+      WHERE
+        /*  %JoinFKPK(tbl_EmpDepartmentHist,deleted," = "," AND") */
+        tbl_EmpDepartmentHist.DepartmentID_Col = deleted.DepartmentID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Department because tbl_EmpDepartmentHist exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_Person FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_Person */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_Emp on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="000730ec", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Emp"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Employee_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Emp
+      WHERE
+        /*  %JoinFKPK(tbl_Emp,deleted," = "," AND") */
+        tbl_Emp.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Person because tbl_Emp exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_EmailAddr on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmailAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmailAddress_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmailAddr
+      WHERE
+        /*  %JoinFKPK(tbl_EmailAddr,deleted," = "," AND") */
+        tbl_EmailAddr.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Person because tbl_EmailAddr exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_BusinessEntityContact on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_Person_PersonID", FK_COLUMNS="PersonID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.PersonID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Person because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_PersonPhn on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_PersonPhn
+      WHERE
+        /*  %JoinFKPK(tbl_PersonPhn,deleted," = "," AND") */
+        tbl_PersonPhn.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Person because tbl_PersonPhn exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_pwd on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_pwd"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Password_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_pwd
+      WHERE
+        /*  %JoinFKPK(tbl_pwd,deleted," = "," AND") */
+        tbl_pwd.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_Person because tbl_pwd exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_Person on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Person"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Person_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_BusinessEntity
+      WHERE
+        /* %JoinFKPK(deleted,tbl_BusinessEntity," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_Person
+          WHERE
+            /* %JoinFKPK(tbl_Person,tbl_BusinessEntity," = "," AND") */
+            tbl_Person.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_Person because tbl_BusinessEntity exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_Person FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_Person */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_Emp on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0007ec96", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Emp"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Employee_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Emp
+      WHERE
+        /*  %JoinFKPK(tbl_Emp,deleted," = "," AND") */
+        tbl_Emp.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Person because tbl_Emp exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_EmailAddr on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmailAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmailAddress_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmailAddr
+      WHERE
+        /*  %JoinFKPK(tbl_EmailAddr,deleted," = "," AND") */
+        tbl_EmailAddr.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Person because tbl_EmailAddr exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_BusinessEntityContact on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_Person_PersonID", FK_COLUMNS="PersonID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_BusinessEntityContact
+      WHERE
+        /*  %JoinFKPK(tbl_BusinessEntityContact,deleted," = "," AND") */
+        tbl_BusinessEntityContact.PersonID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Person because tbl_BusinessEntityContact exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_PersonPhn on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_PersonPhn
+      WHERE
+        /*  %JoinFKPK(tbl_PersonPhn,deleted," = "," AND") */
+        tbl_PersonPhn.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Person because tbl_PersonPhn exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_pwd on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_pwd"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Password_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_pwd
+      WHERE
+        /*  %JoinFKPK(tbl_pwd,deleted," = "," AND") */
+        tbl_pwd.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Person because tbl_pwd exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_Person on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Person"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Person_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_BusinessEntity
+        WHERE
+          /* %JoinFKPK(inserted,tbl_BusinessEntity) */
+          inserted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_Person because tbl_BusinessEntity does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_BusinessEntityContact FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_BusinessEntityContact */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_BusinessEntity  tbl_BusinessEntityContact on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0004de61", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_BusinessEntity
+      WHERE
+        /* %JoinFKPK(deleted,tbl_BusinessEntity," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityContact
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityContact,tbl_BusinessEntity," = "," AND") */
+            tbl_BusinessEntityContact.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityContact because tbl_BusinessEntity exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_ContactTyp  tbl_BusinessEntityContact on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_ContactTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_ContactType_ContactTypeID", FK_COLUMNS="ContactTypID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_ContactTyp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_ContactTyp," = "," AND") */
+        deleted.ContactTypID_Col = tbl_ContactTyp.ContactTypID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityContact
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityContact,tbl_ContactTyp," = "," AND") */
+            tbl_BusinessEntityContact.ContactTypID_Col = tbl_ContactTyp.ContactTypID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityContact because tbl_ContactTyp exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_BusinessEntityContact on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_Person_PersonID", FK_COLUMNS="PersonID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Person
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Person," = "," AND") */
+        deleted.PersonID_Col = tbl_Person.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_BusinessEntityContact
+          WHERE
+            /* %JoinFKPK(tbl_BusinessEntityContact,tbl_Person," = "," AND") */
+            tbl_BusinessEntityContact.PersonID_Col = tbl_Person.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_BusinessEntityContact because tbl_Person exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_BusinessEntityContact FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_BusinessEntityContact */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insPersonID_Col INT, 
+           @insContactTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_BusinessEntity  tbl_BusinessEntityContact on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0004c86d", PARENT_OWNER="", PARENT_TABLE="tbl_BusinessEntity"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_BusinessEntity
+        WHERE
+          /* %JoinFKPK(inserted,tbl_BusinessEntity) */
+          inserted.BusinessEntityID_Col = tbl_BusinessEntity.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityContact because tbl_BusinessEntity does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_ContactTyp  tbl_BusinessEntityContact on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_ContactTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_ContactType_ContactTypeID", FK_COLUMNS="ContactTypID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(ContactTypID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_ContactTyp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_ContactTyp) */
+          inserted.ContactTypID_Col = tbl_ContactTyp.ContactTypID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityContact because tbl_ContactTyp does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_BusinessEntityContact on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_BusinessEntityContact"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_BusinessEntityContact_Person_PersonID", FK_COLUMNS="PersonID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(PersonID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Person
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Person) */
+          inserted.PersonID_Col = tbl_Person.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_BusinessEntityContact because tbl_Person does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_EmailAddr FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_EmailAddr */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_EmailAddr on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00017e90", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmailAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmailAddress_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Person
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Person," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_EmailAddr
+          WHERE
+            /* %JoinFKPK(tbl_EmailAddr,tbl_Person," = "," AND") */
+            tbl_EmailAddr.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_EmailAddr because tbl_Person exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_EmailAddr FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_EmailAddr */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insEmailAddrID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_EmailAddr on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="000195a3", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmailAddr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmailAddress_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Person
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Person) */
+          inserted.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_EmailAddr because tbl_Person does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tU_----TableName ON tbl_Emp FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_Emp */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_EmpDepartmentHist on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00054d42", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmpDepartmentHist
+      WHERE
+        /*  %JoinFKPK(tbl_EmpDepartmentHist,deleted," = "," AND") */
+        tbl_EmpDepartmentHist.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Emp because tbl_EmpDepartmentHist exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_JobCandiDt on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_JobCandiDt"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_JobCandiDt
+      WHERE
+        /*  %JoinFKPK(tbl_JobCandiDt,deleted," = "," AND") */
+        tbl_JobCandiDt.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Emp because tbl_JobCandiDt exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_EmpPayHist on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpPayHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_EmpPayHist
+      WHERE
+        /*  %JoinFKPK(tbl_EmpPayHist,deleted," = "," AND") */
+        tbl_EmpPayHist.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_Emp because tbl_EmpPayHist exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_Emp on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Emp"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Employee_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Person
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Person) */
+          inserted.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_Emp because tbl_Person does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_EmpDepartmentHist FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_EmpDepartmentHist */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Emp  tbl_EmpDepartmentHist on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00032707", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Emp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Emp," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_EmpDepartmentHist
+          WHERE
+            /* %JoinFKPK(tbl_EmpDepartmentHist,tbl_Emp," = "," AND") */
+            tbl_EmpDepartmentHist.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_EmpDepartmentHist because tbl_Emp exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Department  tbl_EmpDepartmentHist on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Department"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Department
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Department," = "," AND") */
+        deleted.DepartmentID_Col = tbl_Department.DepartmentID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_EmpDepartmentHist
+          WHERE
+            /* %JoinFKPK(tbl_EmpDepartmentHist,tbl_Department," = "," AND") */
+            tbl_EmpDepartmentHist.DepartmentID_Col = tbl_Department.DepartmentID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_EmpDepartmentHist because tbl_Department exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_EmpDepartmentHist FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_EmpDepartmentHist */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insDepartmentID_Col SMALLINT, 
+           @insShiftID_Col SMALLINT, 
+           @insStrtDt_Col DATE,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_EmpDepartmentHist on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0003275a", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Emp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Emp) */
+          inserted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_EmpDepartmentHist because tbl_Emp does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Department  tbl_EmpDepartmentHist on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Department"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpDepartmentHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(DepartmentID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Department
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Department) */
+          inserted.DepartmentID_Col = tbl_Department.DepartmentID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_EmpDepartmentHist because tbl_Department does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_EmpPayHist FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_EmpPayHist */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Emp  tbl_EmpPayHist on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00017f13", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpPayHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Emp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Emp," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_EmpPayHist
+          WHERE
+            /* %JoinFKPK(tbl_EmpPayHist,tbl_Emp," = "," AND") */
+            tbl_EmpPayHist.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_EmpPayHist because tbl_Emp exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_EmpPayHist FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_EmpPayHist */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insRateChangeDt_Col DATE,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_EmpPayHist on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00018dd4", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_EmpPayHist"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Emp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Emp) */
+          inserted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_EmpPayHist because tbl_Emp does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_JobCandiDt FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_JobCandiDt */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_Emp  tbl_JobCandiDt on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00018e58", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_JobCandiDt"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Emp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Emp," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_JobCandiDt
+          WHERE
+            /* %JoinFKPK(tbl_JobCandiDt,tbl_Emp," = "," AND") */
+            tbl_JobCandiDt.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_JobCandiDt because tbl_Emp exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_JobCandiDt FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_JobCandiDt */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insJobCandiDtID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_Emp  tbl_JobCandiDt on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001bb7a", PARENT_OWNER="", PARENT_TABLE="tbl_Emp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_JobCandiDt"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Emp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Emp) */
+          inserted.BusinessEntityID_Col = tbl_Emp.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    select @nullcnt = count(*) from inserted where
+      inserted.BusinessEntityID_Col IS NULL
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_JobCandiDt because tbl_Emp does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_PersonPhn FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_PersonPhn */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_PhnNbrTyp  tbl_PersonPhn on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0003011b", PARENT_OWNER="", PARENT_TABLE="tbl_PhnNbrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID", FK_COLUMNS="PhnNbrTypID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_PhnNbrTyp
+      WHERE
+        /* %JoinFKPK(deleted,tbl_PhnNbrTyp," = "," AND") */
+        deleted.PhnNbrTypID_Col = tbl_PhnNbrTyp.PhnNbrTypID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_PersonPhn
+          WHERE
+            /* %JoinFKPK(tbl_PersonPhn,tbl_PhnNbrTyp," = "," AND") */
+            tbl_PersonPhn.PhnNbrTypID_Col = tbl_PhnNbrTyp.PhnNbrTypID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_PersonPhn because tbl_PhnNbrTyp exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_Person  tbl_PersonPhn on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_Person
+      WHERE
+        /* %JoinFKPK(deleted,tbl_Person," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_PersonPhn
+          WHERE
+            /* %JoinFKPK(tbl_PersonPhn,tbl_Person," = "," AND") */
+            tbl_PersonPhn.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_PersonPhn because tbl_Person exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_PersonPhn FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_PersonPhn */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT, 
+           @insPhnNbr_Col CHAR(18), 
+           @insPhnNbrTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_PhnNbrTyp  tbl_PersonPhn on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="000338e1", PARENT_OWNER="", PARENT_TABLE="tbl_PhnNbrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID", FK_COLUMNS="PhnNbrTypID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(PhnNbrTypID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_PhnNbrTyp
+        WHERE
+          /* %JoinFKPK(inserted,tbl_PhnNbrTyp) */
+          inserted.PhnNbrTypID_Col = tbl_PhnNbrTyp.PhnNbrTypID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_PersonPhn because tbl_PhnNbrTyp does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_Person  tbl_PersonPhn on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_Person"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_Person_BusinessEntityID", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_Person
+        WHERE
+          /* %JoinFKPK(inserted,tbl_Person) */
+          inserted.BusinessEntityID_Col = tbl_Person.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_PersonPhn because tbl_Person does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_PhnNbrTyp FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_PhnNbrTyp */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_PhnNbrTyp  tbl_PersonPhn on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00014337", PARENT_OWNER="", PARENT_TABLE="tbl_PhnNbrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID", FK_COLUMNS="PhnNbrTypID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_PersonPhn
+      WHERE
+        /*  %JoinFKPK(tbl_PersonPhn,deleted," = "," AND") */
+        tbl_PersonPhn.PhnNbrTypID_Col = deleted.PhnNbrTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_PhnNbrTyp because tbl_PersonPhn exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_PhnNbrTyp FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_PhnNbrTyp */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insPhnNbrTypID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_PhnNbrTyp  tbl_PersonPhn on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="000163ee", PARENT_OWNER="", PARENT_TABLE="tbl_PhnNbrTyp"
+    CHILD_OWNER="", CHILD_TABLE="tbl_PersonPhn"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID", FK_COLUMNS="PhnNbrTypID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(PhnNbrTypID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_PersonPhn
+      WHERE
+        /*  %JoinFKPK(tbl_PersonPhn,deleted," = "," AND") */
+        tbl_PersonPhn.PhnNbrTypID_Col = deleted.PhnNbrTypID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_PhnNbrTyp because tbl_PersonPhn exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+CREATE TRIGGER tD_----TableName ON tbl_StProvince FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_StProvince */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_StProvince  tbl_Addr on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00029c1a", PARENT_OWNER="", PARENT_TABLE="tbl_StProvince"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Addr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Address_StateProvince_StateProvinceID", FK_COLUMNS="StProvinceID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Addr
+      WHERE
+        /*  %JoinFKPK(tbl_Addr,deleted," = "," AND") */
+        tbl_Addr.StProvinceID_Col = deleted.StProvinceID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_StProvince because tbl_Addr exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* tbl_CountryRgn  tbl_StProvince on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_CountryRgn"
+    CHILD_OWNER="", CHILD_TABLE="tbl_StProvince"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_StateProvince_CountryRegion_CountryRegionCode", FK_COLUMNS="CountryRgnCd_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_CountryRgn
+      WHERE
+        /* %JoinFKPK(deleted,tbl_CountryRgn," = "," AND") */
+        deleted.CountryRgnCd_Col = tbl_CountryRgn.CountryRgnCd_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_StProvince
+          WHERE
+            /* %JoinFKPK(tbl_StProvince,tbl_CountryRgn," = "," AND") */
+            tbl_StProvince.CountryRgnCd_Col = tbl_CountryRgn.CountryRgnCd_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_StProvince because tbl_CountryRgn exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+CREATE TRIGGER tU_----TableName ON tbl_StProvince FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_StProvince */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insStProvinceID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_StProvince  tbl_Addr on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0002cd89", PARENT_OWNER="", PARENT_TABLE="tbl_StProvince"
+    CHILD_OWNER="", CHILD_TABLE="tbl_Addr"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_Address_StateProvince_StateProvinceID", FK_COLUMNS="StProvinceID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(StProvinceID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_Addr
+      WHERE
+        /*  %JoinFKPK(tbl_Addr,deleted," = "," AND") */
+        tbl_Addr.StProvinceID_Col = deleted.StProvinceID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_StProvince because tbl_Addr exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* tbl_CountryRgn  tbl_StProvince on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="tbl_CountryRgn"
+    CHILD_OWNER="", CHILD_TABLE="tbl_StProvince"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_StateProvince_CountryRegion_CountryRegionCode", FK_COLUMNS="CountryRgnCd_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(CountryRgnCd_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_CountryRgn
+        WHERE
+          /* %JoinFKPK(inserted,tbl_CountryRgn) */
+          inserted.CountryRgnCd_Col = tbl_CountryRgn.CountryRgnCd_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_StProvince because tbl_CountryRgn does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+
+CREATE TRIGGER iuPerson ON tbl_Person
+    AFTER INSERT,UPDATE 
+  
+  AS
+
+BEGIN
+    DECLARE @Count int;
+
+    SET @Count = @@ROWCOUNT;
+    IF @Count = 0 
+        RETURN;
+
+    SET NOCOUNT ON;
+
+    IF UPDATE([BusinessEntityID]) OR UPDATE([Demographics]) 
+    BEGIN
+        UPDATE [Person].[Person] 
+        SET [Person].[Person].[Demographics] = N'<IndividualSurvey xmlns="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"> 
+            <TotalPurchaseYTD>0.00</TotalPurchaseYTD> 
+            </IndividualSurvey>' 
+        FROM inserted 
+        WHERE [Person].[Person].[BusinessEntityID] = inserted.[BusinessEntityID] 
+            AND inserted.[Demographics] IS NULL;
+        
+        UPDATE [Person].[Person] 
+        SET [Demographics].modify(N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"; 
+            insert <TotalPurchaseYTD>0.00</TotalPurchaseYTD> 
+            as first 
+            into (/IndividualSurvey)[1]') 
+        FROM inserted 
+        WHERE [Person].[Person].[BusinessEntityID] = inserted.[BusinessEntityID] 
+            AND inserted.[Demographics] IS NOT NULL 
+            AND inserted.[Demographics].exist(N'declare default element namespace 
+                "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"; 
+                /IndividualSurvey/TotalPurchaseYTD') <> 1;
+    END;
+END;
+
+ ;
+
+/
+
+
+
+ALTER TRIGGER iuPerson
+	ENABLE;
+
+
+CREATE TRIGGER dEmployee ON tbl_Emp
+    BEFORE DELETE 
+  
+  AS
+
+BEGIN
+    DECLARE @Count int;
+
+    SET @Count = @@ROWCOUNT;
+    IF @Count = 0 
+        RETURN;
+
+    SET NOCOUNT ON;
+
+    BEGIN
+        RAISERROR
+            (N'Employees cannot be deleted. They can only be marked as not current.', -- Message
+            10, -- Severity.
+            1); -- State.
+
+        -- Rollback any active or uncommittable transactions
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+    END;
+END;
+
+ ;
+
+/
+
+
+
+ALTER TRIGGER dEmployee
+	ENABLE;
+
+
+CREATE TRIGGER tD_Password ON tbl_pwd FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_pwd */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_pwd  tbl_specl_char_test on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00013fb7", PARENT_OWNER="", PARENT_TABLE="tbl_pwd"
+    CHILD_OWNER="", CHILD_TABLE="tbl_specl_char_test"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_43", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_specl_char_test
+      WHERE
+        /*  %JoinFKPK(tbl_specl_char_test,deleted," = "," AND") */
+        tbl_specl_char_test.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete tbl_pwd because tbl_specl_char_test exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+
+
+CREATE TRIGGER tU_Password ON tbl_pwd FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_pwd */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_pwd  tbl_specl_char_test on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00015425", PARENT_OWNER="", PARENT_TABLE="tbl_pwd"
+    CHILD_OWNER="", CHILD_TABLE="tbl_specl_char_test"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_43", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,tbl_specl_char_test
+      WHERE
+        /*  %JoinFKPK(tbl_specl_char_test,deleted," = "," AND") */
+        tbl_specl_char_test.BusinessEntityID_Col = deleted.BusinessEntityID_Col
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update tbl_pwd because tbl_specl_char_test exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+
+
+CREATE TRIGGER tD_specl_char_test ON tbl_specl_char_test FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on tbl_specl_char_test */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* tbl_pwd  tbl_specl_char_test on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001758c", PARENT_OWNER="", PARENT_TABLE="tbl_pwd"
+    CHILD_OWNER="", CHILD_TABLE="tbl_specl_char_test"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_43", FK_COLUMNS="BusinessEntityID_Col" */
+    IF EXISTS (SELECT * FROM deleted,tbl_pwd
+      WHERE
+        /* %JoinFKPK(deleted,tbl_pwd," = "," AND") */
+        deleted.BusinessEntityID_Col = tbl_pwd.BusinessEntityID_Col AND
+        NOT EXISTS (
+          SELECT * FROM tbl_specl_char_test
+          WHERE
+            /* %JoinFKPK(tbl_specl_char_test,tbl_pwd," = "," AND") */
+            tbl_specl_char_test.BusinessEntityID_Col = tbl_pwd.BusinessEntityID_Col
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last tbl_specl_char_test because tbl_pwd exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
+
+
+CREATE TRIGGER tU_specl_char_test ON tbl_specl_char_test FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on tbl_specl_char_test */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insprimary_col__Col CHAR(18), 
+           @insBusinessEntityID_Col INT,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* tbl_pwd  tbl_specl_char_test on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="000187f9", PARENT_OWNER="", PARENT_TABLE="tbl_pwd"
+    CHILD_OWNER="", CHILD_TABLE="tbl_specl_char_test"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_43", FK_COLUMNS="BusinessEntityID_Col" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID_Col)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,tbl_pwd
+        WHERE
+          /* %JoinFKPK(inserted,tbl_pwd) */
+          inserted.BusinessEntityID_Col = tbl_pwd.BusinessEntityID_Col
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update tbl_specl_char_test because tbl_pwd does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+;
+
+
+
