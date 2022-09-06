@@ -1,0 +1,1352 @@
+
+CREATE TYPE [AccountNumber]
+	FROM NVARCHAR(15) NULL
+go
+
+CREATE TYPE [Flag]
+	FROM BIT NOT NULL
+go
+
+CREATE TYPE [NameStyle]
+	FROM BIT NOT NULL
+go
+
+CREATE TYPE [Name]
+	FROM NVARCHAR(50) NULL
+go
+
+CREATE TYPE [OrderNumber]
+	FROM NVARCHAR(25) NULL
+go
+
+CREATE TYPE [Phone]
+	FROM NVARCHAR(25) NULL
+go
+
+CREATE TABLE [child table]
+( 
+	[child col2]         char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [Department]
+( 
+	[DepartmentID]       smallint  IDENTITY ( 1,1 )  NOT NULL ,
+	[Name]               [Name]  NOT NULL ,
+	[GroupName]          [Name]  NOT NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_Department_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [Employee]
+( 
+	[BusinessEntityID]   int  NOT NULL ,
+	[NationalIDNumber]   nvarchar(15) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[LoginID]            nvarchar(256) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[OrganizationNode]   hierarchyid  NULL ,
+	[OrganizationLevel]  AS ([OrganizationNode].[GetLevel]()) ,
+	[JobTitle]           nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[BirthDate]          date  NOT NULL ,
+	[MaritalStatus]      nchar(1) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[Gender]             nchar(1) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[HireDate]           date  NOT NULL ,
+	[SalariedFlag]       [Flag]  NOT NULL 
+	CONSTRAINT [DF_Employee_SalariedFlag]
+		 DEFAULT  1,
+	[VacationHours]      smallint  NOT NULL 
+	CONSTRAINT [DF_Employee_VacationHours]
+		 DEFAULT  0,
+	[SickLeaveHours]     smallint  NOT NULL 
+	CONSTRAINT [DF_Employee_SickLeaveHours]
+		 DEFAULT  0,
+	[CurrentFlag]        [Flag]  NOT NULL 
+	CONSTRAINT [DF_Employee_CurrentFlag]
+		 DEFAULT  1,
+	[rowguid]            uniqueidentifier  ROWGUIDCOL  NOT NULL 
+	CONSTRAINT [DF_Employee_rowguid]
+		 DEFAULT  newid(),
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_Employee_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_BirthDate] CHECK  ( BirthDate BETWEEN '1930-01-01' AND 'dateadd(year,(-18),getdate' )
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_MaritalStatus] CHECK  ( [MaritalStatus]='S' OR [MaritalStatus]='M' )
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_Gender] CHECK  ( [Gender]='F' OR [Gender]='M' )
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_HireDate] CHECK  ( HireDate BETWEEN '1996-07-01' AND 'dateadd(day,(1),getdate' )
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_VacationHours] CHECK  ( VacationHours BETWEEN -40 AND 240 )
+go
+
+ALTER TABLE [Employee]
+	 WITH CHECK ADD CONSTRAINT [CK_Employee_SickLeaveHours] CHECK  ( SickLeaveHours BETWEEN 0 AND 120 )
+go
+
+CREATE TABLE [EmployeeDepartmentHistory]
+( 
+	[BusinessEntityID]   int  NOT NULL ,
+	[DepartmentID]       smallint  NOT NULL ,
+	[ShiftID]            tinyint  NOT NULL ,
+	[StartDate]          date  NOT NULL ,
+	[EndDate]            date  NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_EmployeeDepartmentHistory_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [EmployeePayHistory]
+( 
+	[BusinessEntityID]   int  NOT NULL ,
+	[RateChangeDate]     datetime  NOT NULL ,
+	[Rate]               money  NOT NULL ,
+	[PayFrequency]       tinyint  NOT NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_EmployeePayHistory_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+ALTER TABLE [EmployeePayHistory]
+	 WITH CHECK ADD CONSTRAINT [CK_EmployeePayHistory_Rate] CHECK  ( Rate BETWEEN 6.50 AND 200.00 )
+go
+
+ALTER TABLE [EmployeePayHistory]
+	 WITH CHECK ADD CONSTRAINT [CK_EmployeePayHistory_PayFrequency] CHECK  ( [PayFrequency]=2 OR [PayFrequency]=1 )
+go
+
+CREATE TABLE [JobCandidate]
+( 
+	[JobCandidateID]     int  IDENTITY ( 1,1 )  NOT NULL ,
+	[BusinessEntityID]   int  NULL ,
+	[Resume]             xml ( CONTENT [HRResumeSchemaCollection] ) NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_JobCandidate_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [new table01]
+( 
+	[col1]               char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [Shift]
+( 
+	[ShiftID]            tinyint  IDENTITY ( 1,1 )  NOT NULL ,
+	[Name]               [Name]  NOT NULL ,
+	[StartTime]          time(7)  NOT NULL ,
+	[EndTime]            time(7)  NOT NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_Shift_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+ALTER TABLE [child table]
+	ADD CONSTRAINT [XPKchild table] PRIMARY KEY  CLUSTERED ([child col2] ASC)
+go
+
+ALTER TABLE [Department]
+	ADD CONSTRAINT [PK_Department_DepartmentID] PRIMARY KEY  CLUSTERED ([DepartmentID] ASC)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Department_Name] ON [Department]
+( 
+	[Name]                ASC
+)
+go
+
+ALTER TABLE [Employee]
+	ADD CONSTRAINT [PK_Employee_BusinessEntityID] PRIMARY KEY  CLUSTERED ([BusinessEntityID] ASC)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Employee_LoginID] ON [Employee]
+( 
+	[LoginID]             ASC
+)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Employee_NationalIDNumber] ON [Employee]
+( 
+	[NationalIDNumber]    ASC
+)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Employee_rowguid] ON [Employee]
+( 
+	[rowguid]             ASC
+)
+go
+
+CREATE NONCLUSTERED INDEX [IX_Employee_OrganizationNode] ON [Employee]
+( 
+	[OrganizationNode]    ASC
+)
+go
+
+CREATE NONCLUSTERED INDEX [IX_Employee_OrganizationLevel_OrganizationNode] ON [Employee]
+( 
+	[OrganizationLevel]   ASC,
+	[OrganizationNode]    ASC
+)
+go
+
+ALTER TABLE [EmployeeDepartmentHistory]
+	ADD CONSTRAINT [PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_DepartmentID] PRIMARY KEY  CLUSTERED ([BusinessEntityID] ASC,[StartDate] ASC,[DepartmentID] ASC,[ShiftID] ASC)
+go
+
+ALTER TABLE [EmployeePayHistory]
+	ADD CONSTRAINT [PK_EmployeePayHistory_BusinessEntityID_RateChangeDate] PRIMARY KEY  CLUSTERED ([BusinessEntityID] ASC,[RateChangeDate] ASC)
+go
+
+ALTER TABLE [JobCandidate]
+	ADD CONSTRAINT [PK_JobCandidate_JobCandidateID] PRIMARY KEY  CLUSTERED ([JobCandidateID] ASC)
+go
+
+ALTER TABLE [new table01]
+	ADD CONSTRAINT [XPKa] PRIMARY KEY  CLUSTERED ([col1] ASC)
+go
+
+ALTER TABLE [Shift]
+	ADD CONSTRAINT [PK_Shift_ShiftID] PRIMARY KEY  CLUSTERED ([ShiftID] ASC)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Shift_Name] ON [Shift]
+( 
+	[Name]                ASC
+)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Shift_StartTime_EndTime] ON [Shift]
+( 
+	[StartTime]           ASC,
+	[EndTime]             ASC
+)
+go
+
+
+ALTER TABLE [child table]
+	ADD CONSTRAINT [R/6] FOREIGN KEY ([child col2]) REFERENCES [new table01]([col1])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+
+ALTER TABLE [EmployeeDepartmentHistory] WITH CHECK 
+	ADD CONSTRAINT  [CK_EmployeeDepartmentHistory_EndDate]
+		CHECK  ( [EndDate]>=[StartDate] OR [EndDate] IS NULL ) 
+go
+
+
+ALTER TABLE [EmployeeDepartmentHistory] WITH CHECK 
+	ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID] FOREIGN KEY ([DepartmentID]) REFERENCES [Department]([DepartmentID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [EmployeeDepartmentHistory]
+	  WITH CHECK CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Department_DepartmentID]
+go
+
+ALTER TABLE [EmployeeDepartmentHistory] WITH CHECK 
+	ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_BusinessEntityID] FOREIGN KEY ([BusinessEntityID]) REFERENCES [Employee]([BusinessEntityID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [EmployeeDepartmentHistory]
+	  WITH CHECK CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Employee_BusinessEntityID]
+go
+
+ALTER TABLE [EmployeeDepartmentHistory] WITH CHECK 
+	ADD CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID] FOREIGN KEY ([ShiftID]) REFERENCES [Shift]([ShiftID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [EmployeeDepartmentHistory]
+	  WITH CHECK CHECK CONSTRAINT [FK_EmployeeDepartmentHistory_Shift_ShiftID]
+go
+
+
+ALTER TABLE [EmployeePayHistory] WITH CHECK 
+	ADD CONSTRAINT [FK_EmployeePayHistory_Employee_BusinessEntityID] FOREIGN KEY ([BusinessEntityID]) REFERENCES [Employee]([BusinessEntityID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [EmployeePayHistory]
+	  WITH CHECK CHECK CONSTRAINT [FK_EmployeePayHistory_Employee_BusinessEntityID]
+go
+
+
+ALTER TABLE [JobCandidate] WITH CHECK 
+	ADD CONSTRAINT [FK_JobCandidate_Employee_BusinessEntityID] FOREIGN KEY ([BusinessEntityID]) REFERENCES [Employee]([BusinessEntityID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [JobCandidate]
+	  WITH CHECK CHECK CONSTRAINT [FK_JobCandidate_Employee_BusinessEntityID]
+go
+
+CREATE TRIGGER HumanResources.tD_EmployeePayHistory ON HumanResources.EmployeePayHistory FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on EmployeePayHistory */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.EmployeePayHistory on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001e254", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeePayHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (SELECT * FROM deleted,HumanResources.Employee
+      WHERE
+        /* %JoinFKPK(deleted,HumanResources.Employee," = "," AND") */
+        deleted.BusinessEntityID = HumanResources.Employee.BusinessEntityID AND
+        NOT EXISTS (
+          SELECT * FROM HumanResources.EmployeePayHistory
+          WHERE
+            /* %JoinFKPK(HumanResources.EmployeePayHistory,HumanResources.Employee," = "," AND") */
+            HumanResources.EmployeePayHistory.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last HumanResources.EmployeePayHistory because HumanResources.Employee exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_EmployeePayHistory ON HumanResources.EmployeePayHistory FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on EmployeePayHistory */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID int, 
+           @insRateChangeDate datetime,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.EmployeePayHistory on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001cb1d", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeePayHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,HumanResources.Employee
+        WHERE
+          /* %JoinFKPK(inserted,HumanResources.Employee) */
+          inserted.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update HumanResources.EmployeePayHistory because HumanResources.Employee does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tD_JobCandidate ON HumanResources.JobCandidate FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on JobCandidate */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.JobCandidate on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001d50e", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="JobCandidate"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (SELECT * FROM deleted,HumanResources.Employee
+      WHERE
+        /* %JoinFKPK(deleted,HumanResources.Employee," = "," AND") */
+        deleted.BusinessEntityID = HumanResources.Employee.BusinessEntityID AND
+        NOT EXISTS (
+          SELECT * FROM HumanResources.JobCandidate
+          WHERE
+            /* %JoinFKPK(HumanResources.JobCandidate,HumanResources.Employee," = "," AND") */
+            HumanResources.JobCandidate.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last HumanResources.JobCandidate because HumanResources.Employee exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_JobCandidate ON HumanResources.JobCandidate FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on JobCandidate */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insJobCandidateID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.JobCandidate on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001ef4f", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="JobCandidate"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,HumanResources.Employee
+        WHERE
+          /* %JoinFKPK(inserted,HumanResources.Employee) */
+          inserted.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    select @nullcnt = count(*) from inserted where
+      inserted.BusinessEntityID IS NULL
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update HumanResources.JobCandidate because HumanResources.Employee does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tD_Shift ON HumanResources.Shift FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Shift */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Shift  HumanResources.EmployeeDepartmentHistory on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00016e06", PARENT_OWNER="HumanResources", PARENT_TABLE="Shift"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Shift_ShiftID", FK_COLUMNS="ShiftID" */
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.ShiftID = deleted.ShiftID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete HumanResources.Shift because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_Shift ON HumanResources.Shift FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on Shift */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insShiftID tinyint,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Shift  HumanResources.EmployeeDepartmentHistory on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00019340", PARENT_OWNER="HumanResources", PARENT_TABLE="Shift"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Shift_ShiftID", FK_COLUMNS="ShiftID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(ShiftID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.ShiftID = deleted.ShiftID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update HumanResources.Shift because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tD_Department ON HumanResources.Department FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Department */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Department  HumanResources.EmployeeDepartmentHistory on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00018198", PARENT_OWNER="HumanResources", PARENT_TABLE="Department"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID" */
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.DepartmentID = deleted.DepartmentID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete HumanResources.Department because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_Department ON HumanResources.Department FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on Department */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insDepartmentID smallint,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Department  HumanResources.EmployeeDepartmentHistory on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001a2e8", PARENT_OWNER="HumanResources", PARENT_TABLE="Department"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(DepartmentID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.DepartmentID = deleted.DepartmentID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update HumanResources.Department because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER [dEmployee] ON Employee
+   WITH 
+ EXECUTE AS CALLER  INSTEAD OF DELETE 
+ 
+ NOT FOR REPLICATION 
+  AS
+
+BEGIN
+    DECLARE @Count int;
+
+    SET @Count = @@ROWCOUNT;
+    IF @Count = 0 
+        RETURN;
+
+    SET NOCOUNT ON;
+
+    BEGIN
+        RAISERROR
+            (N'Employees cannot be deleted. They can only be marked as not current.', -- Message
+            10, -- Severity.
+            1); -- State.
+
+        -- Rollback any active or uncommittable transactions
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+    END;
+END;
+
+ 
+go
+
+
+ENABLE TRIGGER [dEmployee] ON Employee
+go
+
+CREATE TRIGGER HumanResources.tD_Employee ON HumanResources.Employee FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Employee */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.EmployeePayHistory on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00017c73", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeePayHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeePayHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeePayHistory,deleted," = "," AND") */
+        HumanResources.EmployeePayHistory.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete HumanResources.Employee because HumanResources.EmployeePayHistory exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_Employee ON HumanResources.Employee FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on Employee */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.EmployeeDepartmentHistory on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00048cf9", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update HumanResources.Employee because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.JobCandidate on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="JobCandidate"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.JobCandidate
+      WHERE
+        /*  %JoinFKPK(HumanResources.JobCandidate,deleted," = "," AND") */
+        HumanResources.JobCandidate.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update HumanResources.Employee because HumanResources.JobCandidate exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.EmployeePayHistory on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeePayHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeePayHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeePayHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeePayHistory,deleted," = "," AND") */
+        HumanResources.EmployeePayHistory.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update HumanResources.Employee because HumanResources.EmployeePayHistory exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.Trigger_371 ON HumanResources.Employee FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Employee */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.JobCandidate on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001671d", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="JobCandidate"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_JobCandidate_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.JobCandidate
+      WHERE
+        /*  %JoinFKPK(HumanResources.JobCandidate,deleted," = "," AND") */
+        HumanResources.JobCandidate.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete HumanResources.Employee because HumanResources.JobCandidate exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.Trigger_381 ON HumanResources.Employee FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Employee */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.EmployeeDepartmentHistory on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001866a", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (
+      SELECT * FROM deleted,HumanResources.EmployeeDepartmentHistory
+      WHERE
+        /*  %JoinFKPK(HumanResources.EmployeeDepartmentHistory,deleted," = "," AND") */
+        HumanResources.EmployeeDepartmentHistory.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete HumanResources.Employee because HumanResources.EmployeeDepartmentHistory exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tD_EmployeeDepartmentHistory ON HumanResources.EmployeeDepartmentHistory FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on EmployeeDepartmentHistory */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* HumanResources.Shift  HumanResources.EmployeeDepartmentHistory on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00059391", PARENT_OWNER="HumanResources", PARENT_TABLE="Shift"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Shift_ShiftID", FK_COLUMNS="ShiftID" */
+    IF EXISTS (SELECT * FROM deleted,HumanResources.Shift
+      WHERE
+        /* %JoinFKPK(deleted,HumanResources.Shift," = "," AND") */
+        deleted.ShiftID = HumanResources.Shift.ShiftID AND
+        NOT EXISTS (
+          SELECT * FROM HumanResources.EmployeeDepartmentHistory
+          WHERE
+            /* %JoinFKPK(HumanResources.EmployeeDepartmentHistory,HumanResources.Shift," = "," AND") */
+            HumanResources.EmployeeDepartmentHistory.ShiftID = HumanResources.Shift.ShiftID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last HumanResources.EmployeeDepartmentHistory because HumanResources.Shift exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* HumanResources.Employee  HumanResources.EmployeeDepartmentHistory on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (SELECT * FROM deleted,HumanResources.Employee
+      WHERE
+        /* %JoinFKPK(deleted,HumanResources.Employee," = "," AND") */
+        deleted.BusinessEntityID = HumanResources.Employee.BusinessEntityID AND
+        NOT EXISTS (
+          SELECT * FROM HumanResources.EmployeeDepartmentHistory
+          WHERE
+            /* %JoinFKPK(HumanResources.EmployeeDepartmentHistory,HumanResources.Employee," = "," AND") */
+            HumanResources.EmployeeDepartmentHistory.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last HumanResources.EmployeeDepartmentHistory because HumanResources.Employee exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* HumanResources.Department  HumanResources.EmployeeDepartmentHistory on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Department"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID" */
+    IF EXISTS (SELECT * FROM deleted,HumanResources.Department
+      WHERE
+        /* %JoinFKPK(deleted,HumanResources.Department," = "," AND") */
+        deleted.DepartmentID = HumanResources.Department.DepartmentID AND
+        NOT EXISTS (
+          SELECT * FROM HumanResources.EmployeeDepartmentHistory
+          WHERE
+            /* %JoinFKPK(HumanResources.EmployeeDepartmentHistory,HumanResources.Department," = "," AND") */
+            HumanResources.EmployeeDepartmentHistory.DepartmentID = HumanResources.Department.DepartmentID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last HumanResources.EmployeeDepartmentHistory because HumanResources.Department exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER HumanResources.tU_EmployeeDepartmentHistory ON HumanResources.EmployeeDepartmentHistory FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on EmployeeDepartmentHistory */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID int, 
+           @insDepartmentID smallint, 
+           @insShiftID tinyint, 
+           @insStartDate date,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* HumanResources.Shift  HumanResources.EmployeeDepartmentHistory on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00054339", PARENT_OWNER="HumanResources", PARENT_TABLE="Shift"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Shift_ShiftID", FK_COLUMNS="ShiftID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(ShiftID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,HumanResources.Shift
+        WHERE
+          /* %JoinFKPK(inserted,HumanResources.Shift) */
+          inserted.ShiftID = HumanResources.Shift.ShiftID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update HumanResources.EmployeeDepartmentHistory because HumanResources.Shift does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* HumanResources.Employee  HumanResources.EmployeeDepartmentHistory on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Employee"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,HumanResources.Employee
+        WHERE
+          /* %JoinFKPK(inserted,HumanResources.Employee) */
+          inserted.BusinessEntityID = HumanResources.Employee.BusinessEntityID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update HumanResources.EmployeeDepartmentHistory because HumanResources.Employee does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* HumanResources.Department  HumanResources.EmployeeDepartmentHistory on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="HumanResources", PARENT_TABLE="Department"
+    CHILD_OWNER="HumanResources", CHILD_TABLE="EmployeeDepartmentHistory"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_EmployeeDepartmentHistory_Department_DepartmentID", FK_COLUMNS="DepartmentID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(DepartmentID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,HumanResources.Department
+        WHERE
+          /* %JoinFKPK(inserted,HumanResources.Department) */
+          inserted.DepartmentID = HumanResources.Department.DepartmentID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update HumanResources.EmployeeDepartmentHistory because HumanResources.Department does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_new_table01 ON "new table01" FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on "new table01" */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* "new table01"  "child table" on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00011660", PARENT_OWNER="", PARENT_TABLE=""new table01""
+    CHILD_OWNER="", CHILD_TABLE=""child table""
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R/6", FK_COLUMNS=""child col2"" */
+    IF EXISTS (
+      SELECT * FROM deleted,"child table"
+      WHERE
+        /*  %JoinFKPK("child table",deleted," = "," AND") */
+        "child table"."child col2" = deleted.col1
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete "new table01" because "child table" exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_new_table01 ON "new table01" FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on "new table01" */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @inscol1 char(18),
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* "new table01"  "child table" on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001319d", PARENT_OWNER="", PARENT_TABLE=""new table01""
+    CHILD_OWNER="", CHILD_TABLE=""child table""
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R/6", FK_COLUMNS=""child col2"" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(col1)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,"child table"
+      WHERE
+        /*  %JoinFKPK("child table",deleted," = "," AND") */
+        "child table"."child col2" = deleted.col1
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update "new table01" because "child table" exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_child_table ON "child table" FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on "child table" */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* "new table01"  "child table" on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="000160e9", PARENT_OWNER="", PARENT_TABLE=""new table01""
+    CHILD_OWNER="", CHILD_TABLE=""child table""
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R/6", FK_COLUMNS=""child col2"" */
+    IF EXISTS (SELECT * FROM deleted,"new table01"
+      WHERE
+        /* %JoinFKPK(deleted,"new table01"," = "," AND") */
+        deleted."child col2" = "new table01".col1 AND
+        NOT EXISTS (
+          SELECT * FROM "child table"
+          WHERE
+            /* %JoinFKPK("child table","new table01"," = "," AND") */
+            "child table"."child col2" = "new table01".col1
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last "child table" because "new table01" exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_child_table ON "child table" FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on "child table" */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           "@ins""child col2""" char(18),
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* "new table01"  "child table" on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="000183bf", PARENT_OWNER="", PARENT_TABLE=""new table01""
+    CHILD_OWNER="", CHILD_TABLE=""child table""
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R/6", FK_COLUMNS=""child col2"" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE("child col2")
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,"new table01"
+        WHERE
+          /* %JoinFKPK(inserted,"new table01") */
+          inserted."child col2" = "new table01".col1
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update "child table" because "new table01" does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
