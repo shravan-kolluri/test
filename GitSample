@@ -37,3 +37,10 @@ CREATE TABLE [tab03]
 	[col3]               char(18)  NULL 
 )
 go
+
+
+CREATE TABLE [tab04]
+( 
+	[colx]               char(18)  NULL 
+)
+go
