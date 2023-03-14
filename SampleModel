@@ -4,3 +4,8 @@ CREATE TABLE [new_table]
 	[col1]               char(18)  NULL 
 )
 go
+
+
+ALTER TABLE [new_table]
+ADD [col2]  char(18)  NULL
+go
