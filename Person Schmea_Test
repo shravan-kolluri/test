@@ -2385,3 +2385,10 @@ END
 go
 
 
+
+
+CREATE TABLE [E_17]
+( 
+	[a]                  char(18)  NULL 
+)
+go
