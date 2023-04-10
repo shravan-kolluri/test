@@ -87,3 +87,15 @@ ALTER TABLE [SlsOrdr]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [Addr]
+( 
+	[id_col]             char(18)  NOT NULL ,
+	[desc_col]           char(18)  NULL 
+)
+go
+
+ALTER TABLE [Addr]
+ADD CONSTRAINT [XPKaddress] PRIMARY KEY  CLUSTERED ([id_col] ASC)
+go
