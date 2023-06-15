@@ -6985,3 +6985,8 @@ END
 go
 
 
+
+
+ALTER TABLE [E_37]
+ADD [col1]  char(18)  NULL
+go
