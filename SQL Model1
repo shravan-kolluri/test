@@ -723,3 +723,14 @@ go
 
 
 
+
+
+ALTER TABLE [cust]
+ADD [newcol]  char(18)  NULL
+go
+
+CREATE TABLE [newtable_prd]
+( 
+	[col1]               char(18)  NULL 
+)
+go
