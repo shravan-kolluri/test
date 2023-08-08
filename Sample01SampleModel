@@ -915,3 +915,8 @@ END
 go
 
 
+
+
+ALTER TABLE [E_22]
+ADD [s]  char(18)  NULL
+go
