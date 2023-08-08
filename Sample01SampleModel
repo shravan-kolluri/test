@@ -1,0 +1,917 @@
+
+CREATE TYPE [AccountNumber]
+	FROM NVARCHAR(15) NULL
+go
+
+CREATE TYPE [Flag]
+	FROM BIT NOT NULL
+go
+
+CREATE TYPE [NameStyle]
+	FROM BIT NOT NULL
+go
+
+CREATE TYPE [Name]
+	FROM NVARCHAR(50) NULL
+go
+
+CREATE TYPE [OrderNumber]
+	FROM NVARCHAR(25) NULL
+go
+
+CREATE TYPE [Phone]
+	FROM NVARCHAR(25) NULL
+go
+
+CREATE TABLE [Address]
+( 
+	[d]                  char(18)  NULL 
+)
+go
+
+CREATE TABLE [facts_tables]
+( 
+	[target1t]           char(18)  NOT NULL ,
+	[argetcol]           char(18)  NULL 
+)
+go
+
+CREATE TABLE [ProductVendor]
+( 
+	[ProductID]          int  NOT NULL ,
+	[BusinessEntityID]   int  NOT NULL ,
+	[AverageLeadTime]    int  NOT NULL ,
+	[StandardPrice]      money  NOT NULL ,
+	[LastReceiptCost]    money  NULL ,
+	[LastReceiptDate]    datetime  NULL ,
+	[MinOrderQty]        int  NOT NULL ,
+	[MaxOrderQty]        int  NOT NULL ,
+	[OnOrderQty]         int  NULL ,
+	[UnitMeasureCode]    nchar(3) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_ProductVendor_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [PurchaseOrderDetail]
+( 
+	[PurchaseOrderID]    int  NOT NULL ,
+	[PurchaseOrderDetailID] int  IDENTITY ( 1,1 )  NOT NULL ,
+	[DueDate]            datetime  NOT NULL ,
+	[OrderQty]           smallint  NOT NULL ,
+	[ProductID]          int  NOT NULL ,
+	[UnitPrice]          money  NOT NULL ,
+	[LineTotal]          AS (isnull([OrderQty]*[UnitPrice],(0.00))) ,
+	[ReceivedQty]        decimal(8,2)  NOT NULL ,
+	[RejectedQty]        decimal(8,2)  NOT NULL ,
+	[StockedQty]         AS (isnull([ReceivedQty]-[RejectedQty],(0.00))) ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderDetail_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [PurchaseOrderHeader]
+( 
+	[PurchaseOrderID]    int  IDENTITY ( 1,1 )  NOT NULL ,
+	[RevisionNumber]     tinyint  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_RevisionNumber]
+		 DEFAULT  0,
+	[Status]             tinyint  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_Status]
+		 DEFAULT  1,
+	[EmployeeID]         int  NOT NULL ,
+	[VendorID]           int  NOT NULL ,
+	[ShipMethodID]       int  NOT NULL ,
+	[OrderDate]          datetime  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_OrderDate]
+		 DEFAULT  getdate(),
+	[ShipDate]           datetime  NULL ,
+	[SubTotal]           money  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_SubTotal]
+		 DEFAULT  0,
+	[TaxAmt]             money  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_TaxAmt]
+		 DEFAULT  0.00,
+	[Freight]            money  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_Freight]
+		 DEFAULT  0.00,
+	[TotalDue]           AS (isnull(([SubTotal]+[TaxAmt])+[Freight],(0))) PERSISTED NOT NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_PurchaseOrderHeader_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [ShipMethod]
+( 
+	[ShipMethodID]       int  IDENTITY ( 1,1 )  NOT NULL ,
+	[Name]               [Name]  NOT NULL ,
+	[ShipBase]           money  NOT NULL 
+	CONSTRAINT [DF_ShipMethod_ShipBase]
+		 DEFAULT  0.00,
+	[ShipRate]           money  NOT NULL 
+	CONSTRAINT [DF_ShipMethod_ShipRate]
+		 DEFAULT  0.00,
+	[rowguid]            uniqueidentifier  ROWGUIDCOL  NOT NULL 
+	CONSTRAINT [DF_ShipMethod_rowguid]
+		 DEFAULT  newid(),
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_ShipMethod_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+CREATE TABLE [Vendor]
+( 
+	[BusinessEntityID]   int  NOT NULL ,
+	[AccountNumber]      [AccountNumber]  NOT NULL ,
+	[Name]               [Name]  NOT NULL ,
+	[CreditRating]       tinyint  NOT NULL ,
+	[PreferredVendorStatus] [Flag]  NOT NULL 
+	CONSTRAINT [DF_Vendor_PreferredVendorStatus]
+		 DEFAULT  1,
+	[ActiveFlag]         [Flag]  NOT NULL 
+	CONSTRAINT [DF_Vendor_ActiveFlag]
+		 DEFAULT  1,
+	[PurchasingWebServiceURL] nvarchar(1024) COLLATE SQL_Latin1_General_CP1_CI_AS  NULL ,
+	[ModifiedDate]       datetime  NOT NULL 
+	CONSTRAINT [DF_Vendor_ModifiedDate]
+		 DEFAULT  getdate()
+)
+go
+
+ALTER TABLE [facts_tables]
+	ADD CONSTRAINT [XPKfacts_tables] PRIMARY KEY  CLUSTERED ([target1t] ASC)
+go
+
+ALTER TABLE [ProductVendor]
+	ADD CONSTRAINT [PK_ProductVendor_ProductID_BusinessEntityID] PRIMARY KEY  CLUSTERED ([ProductID] ASC,[BusinessEntityID] ASC)
+go
+
+CREATE NONCLUSTERED INDEX [IX_ProductVendor_UnitMeasureCode] ON [ProductVendor]
+( 
+	[UnitMeasureCode]     ASC
+)
+go
+
+ALTER TABLE [PurchaseOrderDetail]
+	ADD CONSTRAINT [PK_PurchaseOrderDetail_PurchaseOrderID_PurchaseOrderDetailID] PRIMARY KEY  CLUSTERED ([PurchaseOrderID] ASC,[PurchaseOrderDetailID] ASC)
+go
+
+CREATE NONCLUSTERED INDEX [IX_PurchaseOrderDetail_ProductID] ON [PurchaseOrderDetail]
+( 
+	[ProductID]           ASC
+)
+go
+
+ALTER TABLE [PurchaseOrderHeader]
+	ADD CONSTRAINT [PK_PurchaseOrderHeader_PurchaseOrderID] PRIMARY KEY  CLUSTERED ([PurchaseOrderID] ASC)
+go
+
+CREATE NONCLUSTERED INDEX [IX_PurchaseOrderHeader_EmployeeID] ON [PurchaseOrderHeader]
+( 
+	[EmployeeID]          ASC
+)
+go
+
+ALTER TABLE [ShipMethod]
+	ADD CONSTRAINT [PK_ShipMethod_ShipMethodID] PRIMARY KEY  CLUSTERED ([ShipMethodID] ASC)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_ShipMethod_Name] ON [ShipMethod]
+( 
+	[Name]                ASC
+)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_ShipMethod_rowguid] ON [ShipMethod]
+( 
+	[rowguid]             ASC
+)
+go
+
+ALTER TABLE [Vendor]
+	ADD CONSTRAINT [PK_Vendor_BusinessEntityID] PRIMARY KEY  CLUSTERED ([BusinessEntityID] ASC)
+go
+
+CREATE UNIQUE NONCLUSTERED INDEX [AK_Vendor_AccountNumber] ON [Vendor]
+( 
+	[AccountNumber]       ASC
+)
+go
+
+CREATE VIEW [Purchasing].[vVendorWithContacts] AS  SELECT v.[BusinessEntityID], v.[Name], ct.[Name] AS [ContactType], p.[Title], p.[FirstName], p.[MiddleName], p.[LastName], p.[Suffix], pp.[PhoneNumber], pnt.[Name] AS [PhoneNumberType], ea.[EmailAddress], p.[EmailPromotion] FROM Purchasing.Vendor AS v   INNER JOIN   Person.BusinessEntityContact AS bec ON bec.[BusinessEntityID] = v.[BusinessEntityID]   INNER JOIN   Person.ContactType AS ct ON ct.[ContactTypeID] = bec.[ContactTypeID]   INNER JOIN   Person.Person AS p ON p.[BusinessEntityID] = bec.[PersonID]   LEFT OUTER JOIN   Person.EmailAddress AS ea ON ea.[BusinessEntityID] = p.[BusinessEntityID]   LEFT OUTER JOIN   Person.PersonPhone AS pp ON pp.[BusinessEntityID] = p.[BusinessEntityID]   LEFT OUTER JOIN   Person.PhoneNumberType AS pnt ON pnt.[PhoneNumberTypeID] = pp.[PhoneNumberTypeID]
+go
+
+CREATE VIEW [Purchasing].[vVendorWithAddresses] AS  SELECT v.[BusinessEntityID], v.[Name], at.[Name] AS [AddressType], a.[AddressLine1], a.[AddressLine2], a.[City], sp.[Name] AS [StateProvinceName], a.[PostalCode], cr.[Name] AS [CountryRegionName] FROM Purchasing.Vendor AS v   INNER JOIN   Person.BusinessEntityAddress AS bea ON bea.[BusinessEntityID] = v.[BusinessEntityID]   INNER JOIN   Person.Address AS a ON a.[AddressID] = bea.[AddressID]   INNER JOIN   Person.StateProvince AS sp ON sp.[StateProvinceID] = a.[StateProvinceID]   INNER JOIN   Person.CountryRegion AS cr ON cr.[CountryRegionCode] = sp.[CountryRegionCode]   INNER JOIN   Person.AddressType AS at ON at.[AddressTypeID] = bea.[AddressTypeID]
+go
+
+
+ALTER TABLE [ProductVendor] WITH CHECK 
+	ADD CONSTRAINT [FK_ProductVendor_Vendor_BusinessEntityID] FOREIGN KEY ([BusinessEntityID]) REFERENCES [Vendor]([BusinessEntityID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [ProductVendor]
+	  WITH CHECK CHECK CONSTRAINT [FK_ProductVendor_Vendor_BusinessEntityID]
+go
+
+
+ALTER TABLE [PurchaseOrderDetail] WITH CHECK 
+	ADD CONSTRAINT [FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID] FOREIGN KEY ([PurchaseOrderID]) REFERENCES [PurchaseOrderHeader]([PurchaseOrderID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [PurchaseOrderDetail]
+	  WITH CHECK CHECK CONSTRAINT [FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID]
+go
+
+
+ALTER TABLE [PurchaseOrderHeader] WITH CHECK 
+	ADD CONSTRAINT  [CK_PurchaseOrderHeader_ShipDate]
+		CHECK  ( [ShipDate]>=[OrderDate] OR [ShipDate] IS NULL ) 
+go
+
+
+ALTER TABLE [PurchaseOrderHeader] WITH CHECK 
+	ADD CONSTRAINT [FK_PurchaseOrderHeader_Vendor_VendorID] FOREIGN KEY ([VendorID]) REFERENCES [Vendor]([BusinessEntityID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [PurchaseOrderHeader]
+	  WITH CHECK CHECK CONSTRAINT [FK_PurchaseOrderHeader_Vendor_VendorID]
+go
+
+ALTER TABLE [PurchaseOrderHeader] WITH CHECK 
+	ADD CONSTRAINT [FK_PurchaseOrderHeader_ShipMethod_ShipMethodID] FOREIGN KEY ([ShipMethodID]) REFERENCES [ShipMethod]([ShipMethodID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [PurchaseOrderHeader]
+	  WITH CHECK CHECK CONSTRAINT [FK_PurchaseOrderHeader_ShipMethod_ShipMethodID]
+go
+
+CREATE TRIGGER [iuPerson] ON Person
+   WITH 
+ EXECUTE AS CALLER  AFTER INSERT,UPDATE 
+ 
+ NOT FOR REPLICATION 
+  AS
+
+BEGIN
+    DECLARE @Count int;
+
+    SET @Count = @@ROWCOUNT;
+    IF @Count = 0 
+        RETURN;
+
+    SET NOCOUNT ON;
+
+    IF UPDATE([BusinessEntityID]) OR UPDATE([Demographics]) 
+    BEGIN
+        UPDATE [Person].[Person] 
+        SET [Person].[Person].[Demographics] = N'<IndividualSurvey xmlns="http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"> 
+            <TotalPurchaseYTD>0.00</TotalPurchaseYTD> 
+            </IndividualSurvey>' 
+        FROM inserted 
+        WHERE [Person].[Person].[BusinessEntityID] = inserted.[BusinessEntityID] 
+            AND inserted.[Demographics] IS NULL;
+        
+        UPDATE [Person].[Person] 
+        SET [Demographics].modify(N'declare default element namespace "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"; 
+            insert <TotalPurchaseYTD>0.00</TotalPurchaseYTD> 
+            as first 
+            into (/IndividualSurvey)[1]') 
+        FROM inserted 
+        WHERE [Person].[Person].[BusinessEntityID] = inserted.[BusinessEntityID] 
+            AND inserted.[Demographics] IS NOT NULL 
+            AND inserted.[Demographics].exist(N'declare default element namespace 
+                "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/IndividualSurvey"; 
+                /IndividualSurvey/TotalPurchaseYTD') <> 1;
+    END;
+END;
+
+ 
+go
+
+
+ENABLE TRIGGER [iuPerson] ON Person
+go
+
+
+CREATE TRIGGER tD_ProductVendor ON ProductVendor FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on ProductVendor */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* Vendor  ProductVendor on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001743a", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="ProductVendor"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_ProductVendor_Vendor_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (SELECT * FROM deleted,Vendor
+      WHERE
+        /* %JoinFKPK(deleted,Vendor," = "," AND") */
+        deleted.BusinessEntityID = Vendor.BusinessEntityID AND
+        NOT EXISTS (
+          SELECT * FROM ProductVendor
+          WHERE
+            /* %JoinFKPK(ProductVendor,Vendor," = "," AND") */
+            ProductVendor.BusinessEntityID = Vendor.BusinessEntityID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last ProductVendor because Vendor exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+CREATE TRIGGER tU_ProductVendor ON ProductVendor FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on ProductVendor */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insProductID int, 
+           @insBusinessEntityID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* Vendor  ProductVendor on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="000191d9", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="ProductVendor"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_ProductVendor_Vendor_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,Vendor
+        WHERE
+          /* %JoinFKPK(inserted,Vendor) */
+          inserted.BusinessEntityID = Vendor.BusinessEntityID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update ProductVendor because Vendor does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_PurchaseOrderDetail ON PurchaseOrderDetail FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on PurchaseOrderDetail */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* PurchaseOrderHeader  PurchaseOrderDetail on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001bb66", PARENT_OWNER="", PARENT_TABLE="PurchaseOrderHeader"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderDetail"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID", FK_COLUMNS="PurchaseOrderID" */
+    IF EXISTS (SELECT * FROM deleted,PurchaseOrderHeader
+      WHERE
+        /* %JoinFKPK(deleted,PurchaseOrderHeader," = "," AND") */
+        deleted.PurchaseOrderID = PurchaseOrderHeader.PurchaseOrderID AND
+        NOT EXISTS (
+          SELECT * FROM PurchaseOrderDetail
+          WHERE
+            /* %JoinFKPK(PurchaseOrderDetail,PurchaseOrderHeader," = "," AND") */
+            PurchaseOrderDetail.PurchaseOrderID = PurchaseOrderHeader.PurchaseOrderID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last PurchaseOrderDetail because PurchaseOrderHeader exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+CREATE TRIGGER tU_PurchaseOrderDetail ON PurchaseOrderDetail FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on PurchaseOrderDetail */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insPurchaseOrderID int, 
+           @insPurchaseOrderDetailID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* PurchaseOrderHeader  PurchaseOrderDetail on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="0001b0ea", PARENT_OWNER="", PARENT_TABLE="PurchaseOrderHeader"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderDetail"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID", FK_COLUMNS="PurchaseOrderID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(PurchaseOrderID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,PurchaseOrderHeader
+        WHERE
+          /* %JoinFKPK(inserted,PurchaseOrderHeader) */
+          inserted.PurchaseOrderID = PurchaseOrderHeader.PurchaseOrderID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update PurchaseOrderDetail because PurchaseOrderHeader does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_PurchaseOrderHeader ON PurchaseOrderHeader FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on PurchaseOrderHeader */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* PurchaseOrderHeader  PurchaseOrderDetail on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00040e0c", PARENT_OWNER="", PARENT_TABLE="PurchaseOrderHeader"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderDetail"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID", FK_COLUMNS="PurchaseOrderID" */
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderDetail
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderDetail,deleted," = "," AND") */
+        PurchaseOrderDetail.PurchaseOrderID = deleted.PurchaseOrderID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete PurchaseOrderHeader because PurchaseOrderDetail exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* ShipMethod  PurchaseOrderHeader on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="ShipMethod"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID", FK_COLUMNS="ShipMethodID" */
+    IF EXISTS (SELECT * FROM deleted,ShipMethod
+      WHERE
+        /* %JoinFKPK(deleted,ShipMethod," = "," AND") */
+        deleted.ShipMethodID = ShipMethod.ShipMethodID AND
+        NOT EXISTS (
+          SELECT * FROM PurchaseOrderHeader
+          WHERE
+            /* %JoinFKPK(PurchaseOrderHeader,ShipMethod," = "," AND") */
+            PurchaseOrderHeader.ShipMethodID = ShipMethod.ShipMethodID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last PurchaseOrderHeader because ShipMethod exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* Vendor  PurchaseOrderHeader on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_Vendor_VendorID", FK_COLUMNS="VendorID" */
+    IF EXISTS (SELECT * FROM deleted,Vendor
+      WHERE
+        /* %JoinFKPK(deleted,Vendor," = "," AND") */
+        deleted.VendorID = Vendor.BusinessEntityID AND
+        NOT EXISTS (
+          SELECT * FROM PurchaseOrderHeader
+          WHERE
+            /* %JoinFKPK(PurchaseOrderHeader,Vendor," = "," AND") */
+            PurchaseOrderHeader.VendorID = Vendor.BusinessEntityID
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last PurchaseOrderHeader because Vendor exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+CREATE TRIGGER tU_PurchaseOrderHeader ON PurchaseOrderHeader FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on PurchaseOrderHeader */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insPurchaseOrderID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* PurchaseOrderHeader  PurchaseOrderDetail on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="000460f9", PARENT_OWNER="", PARENT_TABLE="PurchaseOrderHeader"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderDetail"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID", FK_COLUMNS="PurchaseOrderID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(PurchaseOrderID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderDetail
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderDetail,deleted," = "," AND") */
+        PurchaseOrderDetail.PurchaseOrderID = deleted.PurchaseOrderID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update PurchaseOrderHeader because PurchaseOrderDetail exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* ShipMethod  PurchaseOrderHeader on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="ShipMethod"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID", FK_COLUMNS="ShipMethodID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(ShipMethodID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,ShipMethod
+        WHERE
+          /* %JoinFKPK(inserted,ShipMethod) */
+          inserted.ShipMethodID = ShipMethod.ShipMethodID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update PurchaseOrderHeader because ShipMethod does not exist.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* Vendor  PurchaseOrderHeader on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_Vendor_VendorID", FK_COLUMNS="VendorID" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(VendorID)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,Vendor
+        WHERE
+          /* %JoinFKPK(inserted,Vendor) */
+          inserted.VendorID = Vendor.BusinessEntityID
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update PurchaseOrderHeader because Vendor does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_ShipMethod ON ShipMethod FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on ShipMethod */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* ShipMethod  PurchaseOrderHeader on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00014e94", PARENT_OWNER="", PARENT_TABLE="ShipMethod"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID", FK_COLUMNS="ShipMethodID" */
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderHeader
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderHeader,deleted," = "," AND") */
+        PurchaseOrderHeader.ShipMethodID = deleted.ShipMethodID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete ShipMethod because PurchaseOrderHeader exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+CREATE TRIGGER tU_ShipMethod ON ShipMethod FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on ShipMethod */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insShipMethodID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* ShipMethod  PurchaseOrderHeader on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="000165e6", PARENT_OWNER="", PARENT_TABLE="ShipMethod"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID", FK_COLUMNS="ShipMethodID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(ShipMethodID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderHeader
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderHeader,deleted," = "," AND") */
+        PurchaseOrderHeader.ShipMethodID = deleted.ShipMethodID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update ShipMethod because PurchaseOrderHeader exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_Vendor ON Vendor FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on Vendor */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* Vendor  PurchaseOrderHeader on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="000241f5", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_Vendor_VendorID", FK_COLUMNS="VendorID" */
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderHeader
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderHeader,deleted," = "," AND") */
+        PurchaseOrderHeader.VendorID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete Vendor because PurchaseOrderHeader exists.'
+      GOTO error
+    END
+
+    /* erwin Builtin Trigger */
+    /* Vendor  ProductVendor on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="ProductVendor"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_ProductVendor_Vendor_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+    IF EXISTS (
+      SELECT * FROM deleted,ProductVendor
+      WHERE
+        /*  %JoinFKPK(ProductVendor,deleted," = "," AND") */
+        ProductVendor.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete Vendor because ProductVendor exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+CREATE TRIGGER tU_Vendor ON Vendor FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on Vendor */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insBusinessEntityID int,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* Vendor  PurchaseOrderHeader on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="000287ff", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="PurchaseOrderHeader"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_PurchaseOrderHeader_Vendor_VendorID", FK_COLUMNS="VendorID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,PurchaseOrderHeader
+      WHERE
+        /*  %JoinFKPK(PurchaseOrderHeader,deleted," = "," AND") */
+        PurchaseOrderHeader.VendorID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update Vendor because PurchaseOrderHeader exists.'
+      GOTO error
+    END
+  END
+
+  /* erwin Builtin Trigger */
+  /* Vendor  ProductVendor on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Vendor"
+    CHILD_OWNER="", CHILD_TABLE="ProductVendor"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="FK_ProductVendor_Vendor_BusinessEntityID", FK_COLUMNS="BusinessEntityID" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(BusinessEntityID)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,ProductVendor
+      WHERE
+        /*  %JoinFKPK(ProductVendor,deleted," = "," AND") */
+        ProductVendor.BusinessEntityID = deleted.BusinessEntityID
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update Vendor because ProductVendor exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
