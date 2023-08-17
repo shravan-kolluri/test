@@ -33,3 +33,10 @@ ALTER TABLE [Prod]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+CREATE TABLE [Sls_Ordr]
+( 
+	[Itms]               char(18)  NULL 
+)
+go
+
