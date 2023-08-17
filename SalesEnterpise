@@ -1,0 +1,35 @@
+
+CREATE TYPE [Addr]
+	FROM CHAR(18) NULL
+go
+
+CREATE TABLE [Cust]
+( 
+	[Cust_Id]            char(18)  NOT NULL ,
+	[Cust_Nam]           char(18)  NULL ,
+	[Addr]               [Addr] 
+)
+go
+
+CREATE TABLE [Prod]
+( 
+	[Prod_Id]            char(18)  NOT NULL ,
+	[Prod_Nam]           char(18)  NULL ,
+	[customer_identification] char(18)  NOT NULL 
+)
+go
+
+ALTER TABLE [Cust]
+	ADD CONSTRAINT [XPKcustomer] PRIMARY KEY  CLUSTERED ([Cust_Id] ASC)
+go
+
+ALTER TABLE [Prod]
+	ADD CONSTRAINT [XPKProduct] PRIMARY KEY  CLUSTERED ([Prod_Id] ASC,[customer_identification] ASC)
+go
+
+
+ALTER TABLE [Prod]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([customer_identification]) REFERENCES [Cust]([Cust_Id])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
