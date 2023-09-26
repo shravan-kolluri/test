@@ -1,0 +1,6 @@
+
+CREATE TABLE test_table
+(
+	test_table_col1      CHAR(18)  NULL ,
+	col1                 CHAR(18)  NULL 
+);
