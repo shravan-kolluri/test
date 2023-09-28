@@ -1,0 +1,54 @@
+
+CREATE TABLE [E_6]
+( 
+	[x]                  char(18)  NULL 
+)
+go
+
+CREATE TABLE [new_table]
+( 
+	[c]                  char(18)  NULL 
+)
+go
+
+CREATE TABLE [table01]
+( 
+	[col1]               char(18)  NOT NULL ,
+	[col2]               char(18)  NULL 
+)
+go
+
+CREATE TABLE [table02]
+( 
+	[col3]               char(18)  NOT NULL ,
+	[col4]               char(18)  NULL ,
+	[col1]               char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [table03]
+( 
+	[col5]               char(18)  NULL 
+)
+go
+
+CREATE TABLE [table04]
+( 
+	[colz]               char(18)  NULL 
+)
+go
+
+ALTER TABLE [table01]
+	ADD CONSTRAINT [XPKtable01] PRIMARY KEY  CLUSTERED ([col1] ASC)
+go
+
+ALTER TABLE [table02]
+	ADD CONSTRAINT [XPKtable02] PRIMARY KEY  CLUSTERED ([col3] ASC,[col1] ASC)
+go
+
+
+ALTER TABLE [table02]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([col1]) REFERENCES [table01]([col1])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
