@@ -5,6 +5,12 @@ CREATE TABLE [E_6]
 )
 go
 
+CREATE TABLE [E_7]
+( 
+	[s]                  char(18)  NULL 
+)
+go
+
 CREATE TABLE [new_table]
 ( 
 	[c]                  char(18)  NULL 
@@ -51,11 +57,4 @@ ALTER TABLE [table02]
 	ADD CONSTRAINT [R_1] FOREIGN KEY ([col1]) REFERENCES [table01]([col1])
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
-go
-
-
-CREATE TABLE [E_7]
-( 
-	[s]                  char(18)  NULL 
-)
 go
