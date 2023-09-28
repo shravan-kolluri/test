@@ -52,3 +52,10 @@ ALTER TABLE [table02]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [E_7]
+( 
+	[s]                  char(18)  NULL 
+)
+go
