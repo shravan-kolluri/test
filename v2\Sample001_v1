@@ -18,6 +18,12 @@ CREATE TABLE [new_tab01]
 )
 go
 
+CREATE TABLE [table03]
+( 
+	[col2]               char(18)  NULL 
+)
+go
+
 ALTER TABLE [E_1]
 	ADD CONSTRAINT [XPKE_1] PRIMARY KEY  CLUSTERED ([a] ASC)
 go
