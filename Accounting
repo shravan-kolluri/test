@@ -1,0 +1,177 @@
+
+CREATE TYPE [entityId]
+	FROM STRING NULL
+go
+
+CREATE TYPE [integer]
+	FROM INTEGER NULL
+go
+
+CREATE TYPE [dateTime]
+	FROM DATETIME NULL
+go
+
+CREATE TYPE [currency]
+	FROM STRING NULL
+go
+
+CREATE TYPE [baseCurrency]
+	FROM STRING NULL
+go
+
+CREATE TYPE [name]
+	FROM STRING NULL
+go
+
+CREATE TYPE [guid]
+	FROM STRING NULL
+go
+
+CREATE TYPE [email]
+	FROM STRING NULL
+go
+
+CREATE TYPE [string]
+	FROM STRING NULL
+go
+
+CREATE TYPE [decimal]
+	FROM DECIMAL() NULL
+go
+
+CREATE TYPE [boolean]
+	FROM BOOLEAN NULL
+go
+
+CREATE TYPE [STRING]
+	FROM STRING NULL
+go
+
+CREATE TYPE [phone]
+	FROM STRING NULL
+go
+
+CREATE TYPE [url]
+	FROM STRING NULL
+go
+
+CREATE TYPE [tickerSymbol]
+	FROM STRING NULL
+go
+
+CREATE TABLE [Account]
+( 
+	[accountId]          [entityId]  NOT NULL ,
+	[accountCategoryCode] [STRING] ,
+	[customerSizeCode]   [STRING] ,
+	[preferredContactMethodCode] [STRING] ,
+	[customerTypeCode]   [STRING] ,
+	[accountRatingCode]  [STRING] ,
+	[industryCode]       [STRING] ,
+	[territoryCode]      [STRING] ,
+	[accountClassificationCode] [STRING] ,
+	[businessTypeCode]   [STRING] ,
+	[traversedPath]      [string] ,
+	[paymentTermsCode]   [STRING] ,
+	[shippingMethodCode] [STRING] ,
+	[primaryContact]     [entityId] ,
+	[participatesInWorkflow] [boolean] ,
+	[name]               [name] ,
+	[accountNumber]      [string] ,
+	[revenue]            [currency] ,
+	[numberOfEmployees]  [integer] ,
+	[description]        [string] ,
+	[SIC]                [string] ,
+	[ownershipCode]      [STRING] ,
+	[marketCap]          [currency] ,
+	[sharesOutstanding]  [integer] ,
+	[stockExchange]      [string] ,
+	[webSiteUrl]         [url] ,
+	[ftpSiteUrl]         [url] ,
+	[EMailAddress1]      [email] ,
+	[EMailAddress2]      [email] ,
+	[EMailAddress3]      [email] ,
+	[doNotPhone]         [boolean] ,
+	[doNotFax]           [boolean] ,
+	[telephone1]         [phone] ,
+	[doNotEMail]         [boolean] ,
+	[telephone2]         [phone] ,
+	[fax]                [string] ,
+	[telephone3]         [phone] ,
+	[doNotPostalMail]    [boolean] ,
+	[doNotBulkEMail]     [boolean] ,
+	[doNotBulkPostalMail] [boolean] ,
+	[creditLimit]        [currency] ,
+	[creditOnHold]       [boolean] ,
+	[parentAccount]      [entityId] ,
+	[aging30]            [currency] ,
+	[stateCode]          [STRING] ,
+	[aging60]            [currency] ,
+	[statusCode]         [STRING] ,
+	[aging90]            [currency] ,
+	[address]            [entityId] ,
+	[preferredAppointmentDayCode] [STRING] ,
+	[preferredSystemUser] [entityId] ,
+	[preferredAppointmentTimeCode] [STRING] ,
+	[merged]             [boolean] ,
+	[doNotSendMM]        [boolean] ,
+	[master]             [entityId] ,
+	[lastUsedInCampaign] [dateTime] ,
+	[exchangeRate]       [decimal] ,
+	[transactionCurrency] [entityId] ,
+	[creditLimitBase]    [baseCurrency] ,
+	[aging30Base]        [baseCurrency] ,
+	[revenueBase]        [baseCurrency] ,
+	[aging90Base]        [baseCurrency] ,
+	[marketCapBase]      [baseCurrency] ,
+	[aging60Base]        [baseCurrency] ,
+	[yomiName]           [STRING] ,
+	[stageId]            [guid] ,
+	[processId]          [guid] ,
+	[entityImageId]      [guid] ,
+	[timeSpentByMeOnEmailAndMeetings] [email] ,
+	[createdByExternalParty] [entityId] ,
+	[modifiedByExternalParty] [entityId] ,
+	[primarySatoriId]    [string] ,
+	[primaryTwitterId]   [string] ,
+	[SLA]                [entityId] ,
+	[SLAInvoked]         [entityId] ,
+	[onHoldTime]         [integer] ,
+	[lastOnHoldTime]     [dateTime] ,
+	[followEmail]        [boolean] ,
+	[marketingOnly]      [boolean] ,
+	[tickerSymbol]       [tickerSymbol] 
+)
+go
+
+CREATE TABLE [Account_Services]
+( 
+	[preferredEquipment] [entityId] ,
+	[preferredService]   [entityId] ,
+	[territory]          [entityId] ,
+	[openDealsState]     [integer] ,
+	[openRevenueDate]    [dateTime] ,
+	[openRevenueState]   [integer] ,
+	[originatingLead]    [entityId] ,
+	[openDeals]          [integer] ,
+	[openDealsDate]      [dateTime] ,
+	[openRevenue]        [currency] ,
+	[openRevenueBase]    [baseCurrency] ,
+	[accountId]          [entityId]  NOT NULL 
+)
+go
+
+ALTER TABLE [Account]
+	ADD CONSTRAINT [XPKAccount] PRIMARY KEY  CLUSTERED ([accountId] ASC)
+go
+
+ALTER TABLE [Account_Services]
+	ADD CONSTRAINT [XPKAccount_Services] PRIMARY KEY  CLUSTERED ([accountId] ASC)
+go
+
+
+ALTER TABLE [Account_Services]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([accountId]) REFERENCES [Account]([accountId])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
