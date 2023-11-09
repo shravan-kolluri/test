@@ -175,3 +175,55 @@ ALTER TABLE [Account_Services]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [Account_Services]
+( 
+	[preferredEquipment] [entityId] ,
+	[preferredService]   [entityId] ,
+	[territory]          [entityId] ,
+	[openDealsState]     [integer] ,
+	[openRevenueDate]    [dateTime] ,
+	[openRevenueState]   [integer] ,
+	[originatingLead]    [entityId] ,
+	[openDeals]          [integer] ,
+	[openDealsDate]      [dateTime] ,
+	[openRevenue]        [currency] ,
+	[openRevenueBase]    [baseCurrency] ,
+	[accountId]          [entityId]  NOT NULL 
+)
+go
+
+CREATE TABLE [AccountLeads]
+( 
+	[accountId]          [entityId] 
+)
+go
+
+CREATE TABLE [Activity]
+( 
+	[accountId]          [entityId] 
+)
+go
+
+ALTER TABLE [Account_Services]
+ADD CONSTRAINT [XPKAccount_Services] PRIMARY KEY  CLUSTERED ([accountId] ASC)
+go
+
+ALTER TABLE [Account_Services]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([accountId]) REFERENCES [Account]([accountId])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [AccountLeads]
+	ADD CONSTRAINT [R_3] FOREIGN KEY ([accountId]) REFERENCES [Account_Services]([accountId])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [Activity]
+	ADD CONSTRAINT [R_2] FOREIGN KEY ([accountId]) REFERENCES [Account_Services]([accountId])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
