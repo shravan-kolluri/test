@@ -227,3 +227,10 @@ ALTER TABLE [Activity]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [new_table]
+( 
+	[col1]               char(18)  NULL 
+)
+go
