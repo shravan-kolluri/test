@@ -1,0 +1,24 @@
+
+CREATE TABLE Location
+(
+	location_id CHAR(18) NOT NULL,
+	location_name CHAR(18),
+	descrition CHAR(18),
+	zip_code CHAR(18),
+	region_id CHAR(18) NOT NULL
+);
+
+ALTER TABLE Location
+	ADD CONSTRAINT XPKLocation PRIMARY KEY (location_id, region_id);
+
+CREATE TABLE Region
+(
+	region_id CHAR(18) NOT NULL,
+	region_name CHAR(18)
+);
+
+ALTER TABLE Region
+	ADD CONSTRAINT XPKRegion PRIMARY KEY (region_id);
+
+ALTER TABLE Location
+	ADD CONSTRAINT R_1 FOREIGN KEY (region_id) REFERENCES Region (region_id);
