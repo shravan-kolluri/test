@@ -22,9 +22,3 @@ ALTER TABLE Region
 
 ALTER TABLE Location
 	ADD CONSTRAINT R_1 FOREIGN KEY (region_id) REFERENCES Region (region_id);
-
-
-CREATE TABLE E_3
-(
-	col1 CHAR(18)
-);
