@@ -1,0 +1,24 @@
+
+CREATE TABLE new_table
+(
+	col1 STRING
+);
+
+CREATE TABLE TAB_CUST1
+(
+	PH_NO NUMERIC,
+	FNAME STRING,
+	LNAME STRING,
+	ADDRESS STRING
+);
+
+CREATE TABLE table1
+(
+	coly NUMBER
+);
+
+CREATE TABLE table2
+(
+	col2 NUMBER,
+	col3 NUMBER
+);
