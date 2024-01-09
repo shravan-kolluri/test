@@ -1,0 +1,29 @@
+
+CREATE TABLE cust
+(
+	cust_identification  CHAR(18)  NOT NULL ,
+	cust_name            CHAR(18)  NULL 
+);
+
+CREATE UNIQUE INDEX XPKcustomer ON cust
+(cust_identification   ASC);
+
+ALTER TABLE cust
+	ADD CONSTRAINT  XPKcustomer PRIMARY KEY (cust_identification);
+
+CREATE TABLE prd
+(
+	prd_Identifier       CHAR(18)  NOT NULL ,
+	prd_Name             CHAR(18)  NULL ,
+	cust_identification  CHAR(18)  NOT NULL 
+);
+
+CREATE UNIQUE INDEX XPKProduct ON prd
+(prd_Identifier   ASC,cust_identification   ASC);
+
+ALTER TABLE prd
+	ADD CONSTRAINT  XPKProduct PRIMARY KEY (prd_Identifier,cust_identification);
+
+ALTER TABLE prd
+	ADD (
+CONSTRAINT R_1 FOREIGN KEY (cust_identification) REFERENCES cust (cust_identification));
