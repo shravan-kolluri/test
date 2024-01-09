@@ -27,3 +27,9 @@ ALTER TABLE prd
 ALTER TABLE prd
 	ADD (
 CONSTRAINT R_1 FOREIGN KEY (cust_identification) REFERENCES cust (cust_identification));
+
+
+CREATE TABLE Sale_Order
+(
+	sale_order_number    CHAR(18)  NULL 
+);
