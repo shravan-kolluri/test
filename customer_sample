@@ -1,0 +1,248 @@
+
+CREATE TYPE [Name]
+	FROM CHAR(50) NULL
+go
+
+CREATE TABLE [B_tab_CUST_BRG]
+( 
+	[CUST_identifier]    char(18)  NOT NULL ,
+	[Name]               [Name] ,
+	[tab_CUST_LOAD_DTS]  DATETIME  NOT NULL 
+)
+go
+
+CREATE TABLE [P_tab_Product_PIT]
+( 
+	[Name]               [Name] ,
+	[product_IDentifier] char(18)  NOT NULL ,
+	[CUST_identifier]    char(18)  NULL ,
+	[tab_CUST_LOAD_DTS]  DATETIME  NULL ,
+	[tab_Product_LOAD_DTS] DATETIME  NOT NULL 
+)
+go
+
+CREATE TABLE [tab_E_4]
+( 
+	[col1]               char(18)  NULL 
+)
+go
+
+ALTER TABLE [B_tab_CUST_BRG]
+	ADD CONSTRAINT [XPKB_customer_BRG] PRIMARY KEY  CLUSTERED ([CUST_identifier] ASC,[tab_CUST_LOAD_DTS] ASC)
+go
+
+ALTER TABLE [P_tab_Product_PIT]
+	ADD CONSTRAINT [XPKP_Product_PIT] PRIMARY KEY  CLUSTERED ([product_IDentifier] ASC,[tab_Product_LOAD_DTS] ASC)
+go
+
+
+ALTER TABLE [P_tab_Product_PIT]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([CUST_identifier],[tab_CUST_LOAD_DTS]) REFERENCES [B_tab_CUST_BRG]([CUST_identifier],[tab_CUST_LOAD_DTS])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+CREATE TRIGGER tD_customer ON B_tab_CUST_BRG FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on B_tab_CUST_BRG */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* B_tab_CUST_BRG  P_tab_Product_PIT on parent delete no action */
+    /* ERWIN_RELATION:CHECKSUM="00015e16", PARENT_OWNER="", PARENT_TABLE="B_tab_CUST_BRG"
+    CHILD_OWNER="", CHILD_TABLE="P_tab_Product_PIT"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST_identifier""tab_CUST_LOAD_DTS" */
+    IF EXISTS (
+      SELECT * FROM deleted,P_tab_Product_PIT
+      WHERE
+        /*  %JoinFKPK(P_tab_Product_PIT,deleted," = "," AND") */
+        P_tab_Product_PIT.CUST_identifier = deleted.CUST_identifier AND
+        P_tab_Product_PIT.tab_CUST_LOAD_DTS = deleted.tab_CUST_LOAD_DTS
+    )
+    BEGIN
+      SELECT @errno  = 30001,
+             @errmsg = 'Cannot delete B_tab_CUST_BRG because P_tab_Product_PIT exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_customer ON B_tab_CUST_BRG FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on B_tab_CUST_BRG */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insCUST_identifier char(18), 
+           @instab_CUST_LOAD_DTS DATETIME,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* B_tab_CUST_BRG  P_tab_Product_PIT on parent update no action */
+  /* ERWIN_RELATION:CHECKSUM="00018dde", PARENT_OWNER="", PARENT_TABLE="B_tab_CUST_BRG"
+    CHILD_OWNER="", CHILD_TABLE="P_tab_Product_PIT"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST_identifier""tab_CUST_LOAD_DTS" */
+  IF
+    /* %ParentPK(" OR",UPDATE) */
+    UPDATE(CUST_identifier) OR
+    UPDATE(tab_CUST_LOAD_DTS)
+  BEGIN
+    IF EXISTS (
+      SELECT * FROM deleted,P_tab_Product_PIT
+      WHERE
+        /*  %JoinFKPK(P_tab_Product_PIT,deleted," = "," AND") */
+        P_tab_Product_PIT.CUST_identifier = deleted.CUST_identifier AND
+        P_tab_Product_PIT.tab_CUST_LOAD_DTS = deleted.tab_CUST_LOAD_DTS
+    )
+    BEGIN
+      SELECT @errno  = 30005,
+             @errmsg = 'Cannot update B_tab_CUST_BRG because P_tab_Product_PIT exists.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tD_Product ON P_tab_Product_PIT FOR DELETE AS
+/* erwin Builtin Trigger */
+/* DELETE trigger on P_tab_Product_PIT */
+BEGIN
+  DECLARE  @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+    /* erwin Builtin Trigger */
+    /* B_tab_CUST_BRG  P_tab_Product_PIT on child delete no action */
+    /* ERWIN_RELATION:CHECKSUM="0001ddaf", PARENT_OWNER="", PARENT_TABLE="B_tab_CUST_BRG"
+    CHILD_OWNER="", CHILD_TABLE="P_tab_Product_PIT"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST_identifier""tab_CUST_LOAD_DTS" */
+    IF EXISTS (SELECT * FROM deleted,B_tab_CUST_BRG
+      WHERE
+        /* %JoinFKPK(deleted,B_tab_CUST_BRG," = "," AND") */
+        deleted.CUST_identifier = B_tab_CUST_BRG.CUST_identifier AND
+        deleted.tab_CUST_LOAD_DTS = B_tab_CUST_BRG.tab_CUST_LOAD_DTS AND
+        NOT EXISTS (
+          SELECT * FROM P_tab_Product_PIT
+          WHERE
+            /* %JoinFKPK(P_tab_Product_PIT,B_tab_CUST_BRG," = "," AND") */
+            P_tab_Product_PIT.CUST_identifier = B_tab_CUST_BRG.CUST_identifier AND
+            P_tab_Product_PIT.tab_CUST_LOAD_DTS = B_tab_CUST_BRG.tab_CUST_LOAD_DTS
+        )
+    )
+    BEGIN
+      SELECT @errno  = 30010,
+             @errmsg = 'Cannot delete last P_tab_Product_PIT because B_tab_CUST_BRG exists.'
+      GOTO error
+    END
+
+
+    /* erwin Builtin Trigger */
+    RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
+
+CREATE TRIGGER tU_Product ON P_tab_Product_PIT FOR UPDATE AS
+/* erwin Builtin Trigger */
+/* UPDATE trigger on P_tab_Product_PIT */
+BEGIN
+  DECLARE  @numrows int,
+           @nullcnt int,
+           @validcnt int,
+           @insproduct_IDentifier char(18), 
+           @instab_Product_LOAD_DTS DATETIME,
+           @errno   int,
+           @severity int,
+           @state    int,
+           @errmsg  varchar(255)
+
+  SELECT @numrows = @@rowcount
+  /* erwin Builtin Trigger */
+  /* B_tab_CUST_BRG  P_tab_Product_PIT on child update no action */
+  /* ERWIN_RELATION:CHECKSUM="00020184", PARENT_OWNER="", PARENT_TABLE="B_tab_CUST_BRG"
+    CHILD_OWNER="", CHILD_TABLE="P_tab_Product_PIT"
+    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
+    FK_CONSTRAINT="R_1", FK_COLUMNS="CUST_identifier""tab_CUST_LOAD_DTS" */
+  IF
+    /* %ChildFK(" OR",UPDATE) */
+    UPDATE(CUST_identifier) OR
+    UPDATE(tab_CUST_LOAD_DTS)
+  BEGIN
+    SELECT @nullcnt = 0
+    SELECT @validcnt = count(*)
+      FROM inserted,B_tab_CUST_BRG
+        WHERE
+          /* %JoinFKPK(inserted,B_tab_CUST_BRG) */
+          inserted.CUST_identifier = B_tab_CUST_BRG.CUST_identifier and
+          inserted.tab_CUST_LOAD_DTS = B_tab_CUST_BRG.tab_CUST_LOAD_DTS
+    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
+    select @nullcnt = count(*) from inserted where
+      inserted.CUST_identifier IS NULL AND
+      inserted.tab_CUST_LOAD_DTS IS NULL
+    IF @validcnt + @nullcnt != @numrows
+    BEGIN
+      SELECT @errno  = 30007,
+             @errmsg = 'Cannot update P_tab_Product_PIT because B_tab_CUST_BRG does not exist.'
+      GOTO error
+    END
+  END
+
+
+  /* erwin Builtin Trigger */
+  RETURN
+error:
+   RAISERROR (@errmsg, -- Message text.
+              @severity, -- Severity (0~25).
+              @state) -- State (0~255).
+    rollback transaction
+END
+
+go
+
+
+
