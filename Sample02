@@ -38,3 +38,10 @@ ALTER TABLE [E_2]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [new_tablex]
+( 
+	[colx]               char(18)  NULL 
+)
+go
