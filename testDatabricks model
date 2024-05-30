@@ -1,0 +1,173 @@
+
+CREATE TABLE person
+(
+	AGE int,
+	NAME string,
+	address VARCHAR(100)
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/ec26540a-7816-4186-8432-ab679743752a'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+CREATE TABLE persons
+(
+	first_name string NOT NULL,
+	last_name string NOT NULL,
+	nickname string
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/af4bf020-0dff-4273-ae83-06a9f7e968f8'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE persons
+	ADD CONSTRAINT persons_pk PRIMARY KEY (first_name, last_name);
+
+CREATE TABLE persons100
+(
+	first_name string NOT NULL,
+	last_name string NOT NULL,
+	nickname string
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/dcf9016c-bf54-487f-86d3-277020a6b14e'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE persons100
+	ADD CONSTRAINT persons100_pk PRIMARY KEY (first_name, last_name);
+
+CREATE TABLE persons2
+(
+	first_name string NOT NULL,
+	last_name string NOT NULL,
+	nickname string
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/d0de6502-c277-4a84-968f-c890ee6f3896'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE persons2
+	ADD CONSTRAINT persons2_pk PRIMARY KEY (first_name, last_name);
+
+CREATE TABLE persons99
+(
+	first_name string NOT NULL,
+	last_name string NOT NULL,
+	nickname string
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/d645afff-0adc-478c-9070-36c6dac7c5ed'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE persons99
+	ADD CONSTRAINT persons99_pk PRIMARY KEY (first_name, last_name);
+
+CREATE TABLE personsxyz2
+(
+	first_name string NOT NULL,
+	last_name string NOT NULL,
+	nickname string
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/eef2b1c8-57fa-4c76-bd4c-b34d90e3085d'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE personsxyz2
+	ADD CONSTRAINT personsxyz_pk PRIMARY KEY (first_name, last_name);
+
+CREATE TABLE pets
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/4de9e782-ba97-404e-8753-7bc8636879e9'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+CREATE TABLE pets
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/12ee8fad-c70a-4649-b779-f495d4045654'
+TBLPROPERTIES ('delta.constraints.pets_name_not_cute_chk'='length ( name ) < 20','delta.minReaderVersion'='1','delta.minWriterVersion'='3');
+
+CREATE TABLE pets2
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL,
+	owner_two_name string NOT NULL,
+	owner_three_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/b811e308-1a04-42fb-8219-712083c8880b'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+CREATE TABLE pets2
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/8dd5a0ac-f5e1-47ae-b06e-7e98e1640611'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+CREATE TABLE pets3
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/1c5f4e04-bb42-4b32-b1f4-4c4b8b74fd45'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+CREATE TABLE pets4
+(
+	name string,
+	owner_first_name string NOT NULL,
+	owner_last_name string NOT NULL
+)
+USING delta
+LOCATION 'abfss://testcontainer@questgen2.dfs.core.windows.net/f4f2d00a-99fe-4e5b-a665-d3bfd218d240/tables/217f23f9-108f-4d6f-96ef-806738d1f94b'
+TBLPROPERTIES ('delta.minReaderVersion'='1','delta.minWriterVersion'='2');
+
+ALTER TABLE pets
+	ADD CONSTRAINT pets_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons99 (first_name, last_name);
+
+ALTER TABLE pets
+	ADD CONSTRAINT pets_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons (first_name, last_name);
+
+ALTER TABLE pets2
+	ADD CONSTRAINT pets2_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons99 (first_name, last_name);
+
+ALTER TABLE pets2
+	ADD CONSTRAINT pets2_persons_fk100 FOREIGN KEY (owner_two_name, owner_three_name) REFERENCES persons100 (first_name, last_name);
+
+ALTER TABLE pets2
+	ADD CONSTRAINT pets2_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons (first_name, last_name);
+
+ALTER TABLE pets3
+	ADD CONSTRAINT pets3_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons (first_name, last_name);
+
+ALTER TABLE pets4
+	ADD CONSTRAINT pets4_persons_fk FOREIGN KEY (owner_first_name, owner_last_name) REFERENCES persons (first_name, last_name);
+
+CREATE    FUNCTION  area (x DOUBLE, y DOUBLE) 
+RETURNS DOUBLE 
+DETERMINISTIC  
+RETURN x * y;
+
+CREATE    FUNCTION  area123 (x DOUBLE, y DOUBLE) 
+RETURNS DOUBLE 
+DETERMINISTIC  
+RETURN x * y;
+
+CREATE    FUNCTION  area777 (x DOUBLE, y DOUBLE) 
+RETURNS DOUBLE 
+DETERMINISTIC  
+RETURN x * y;
