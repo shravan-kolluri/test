@@ -171,3 +171,13 @@ CREATE    FUNCTION  area777 (x DOUBLE, y DOUBLE)
 RETURNS DOUBLE 
 DETERMINISTIC  
 RETURN x * y;
+
+
+ALTER TABLE democatalog6.default.person
+DROP CONSTRAINT IF EXISTS XPKperson;
+
+ALTER TABLE democatalog6.default.person
+ADD COLUMNS (address VARCHAR(100));
+
+ALTER TABLE democatalog6.default.person
+ADD COLUMNS (email CHAR(18));
