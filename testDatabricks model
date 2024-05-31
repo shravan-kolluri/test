@@ -181,3 +181,13 @@ ADD COLUMNS (address VARCHAR(100));
 
 ALTER TABLE democatalog6.default.person
 ADD COLUMNS (email CHAR(18));
+
+
+ALTER TABLE democatalog6.default.person
+DROP CONSTRAINT IF EXISTS XPKperson;
+
+ALTER TABLE democatalog6.default.person
+ADD COLUMNS (phone CHAR(18));
+
+ALTER TABLE democatalog6.default.person
+RENAME COLUMN email TO email_id ;
