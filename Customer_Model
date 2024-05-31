@@ -24,12 +24,16 @@ CREATE UNIQUE INDEX XPKProduct ON prd
 ALTER TABLE prd
 	ADD CONSTRAINT  XPKProduct PRIMARY KEY (prd_Identifier,cust_identification);
 
-ALTER TABLE prd
-	ADD (
-CONSTRAINT R_1 FOREIGN KEY (cust_identification) REFERENCES cust (cust_identification));
-
+CREATE TABLE E_4
+(
+	f                    CHAR(18)  NULL 
+);
 
 CREATE TABLE Sale_Order
 (
 	sale_order_number    CHAR(18)  NULL 
 );
+
+ALTER TABLE prd
+	ADD (
+CONSTRAINT R_1 FOREIGN KEY (cust_identification) REFERENCES cust (cust_identification));
