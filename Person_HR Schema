@@ -3450,3 +3450,10 @@ END
 go
 
 
+
+
+CREATE TABLE [E_22]
+( 
+	[z]                  char(18)  NULL 
+)
+go
