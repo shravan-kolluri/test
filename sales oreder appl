@@ -1,4 +1,157 @@
 
-ALTER TABLE [tbl_new_table]
-ADD [col3]  char(18)  NULL
+CREATE TYPE [Identification]
+	FROM CHAR(5) NULL
+go
+
+CREATE TABLE [mytble_name]
+( 
+	[child_table_Identification] [Identification]  NOT NULL 
+	CONSTRAINT [Default_Value_331_973502070]
+		 DEFAULT  100
+)
+go
+
+CREATE TABLE [tbl_2_whlr]
+( 
+	[vechicle_id]        char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [tbl_4_whlr]
+( 
+	[vechicle_id]        char(18)  NOT NULL ,
+	[door1]              char(18)  NULL 
+)
+go
+
+CREATE TABLE [tbl_car_manufacturers_car_models]
+( 
+	[child_table_Identification] [Identification]  NOT NULL 
+	CONSTRAINT [Default_Value_331_1621121149]
+		 DEFAULT  100
+)
+go
+
+CREATE TABLE [tbl_cust]
+( 
+	[cust_name]          char(18)  NULL ,
+	[Address]            varchar(200)  NULL ,
+	[cust_identification] char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [tbl_E_12]
+( 
+	[E_12_Identification] [Identification] 
+	CONSTRAINT [Default_Value_331_841733547]
+		 DEFAULT  100,
+	[object_col]         xml  NULL 
+)
+go
+
+CREATE TABLE [tbl_new_table]
+( 
+	[col1]               char(18)  NULL ,
+	[col2]               char(18)  NULL 
+)
+go
+
+CREATE TABLE [tbl_prd]
+( 
+	[prd_name]           char(18)  NULL ,
+	[Price]              char(18)  NULL ,
+	[prd_Identifier]     char(18)  NOT NULL ,
+	[prd_Identification] [Identification]  NOT NULL 
+	CONSTRAINT [Default_Value_331_64708128]
+		 DEFAULT  100
+)
+go
+
+CREATE TABLE [tbl_Sales_ord]
+( 
+	[sales_ord_description] real  NULL ,
+	[cust_identification] integer  NULL 
+	CONSTRAINT [Validation_Rule_339_853084084]
+		CHECK  ( cust_identification BETWEEN 1 AND 100 ),
+	[prd_Identifier]     char(18)  NOT NULL 
+	CONSTRAINT [Validation_Rule_338_2134550420]
+		CHECK  ( colvalue>100 ),
+	[prd_Identification] [Identification]  NOT NULL 
+	CONSTRAINT [Default_Value_331_761347710]
+		 DEFAULT  100
+)
+go
+
+CREATE TABLE [tbl_vhcl_info]
+( 
+	[vechicle_id]        char(18)  NOT NULL ,
+	[vhcl_name]          char(18)  NULL ,
+	[no_of_wheels]       char(18)  NULL 
+)
+go
+
+ALTER TABLE [mytble_name]
+	ADD CONSTRAINT [XPKchild_table] PRIMARY KEY  CLUSTERED ([child_table_Identification] ASC)
+go
+
+ALTER TABLE [tbl_2_whlr]
+	ADD CONSTRAINT [XPK2_wheeler] PRIMARY KEY  CLUSTERED ([vechicle_id] ASC)
+go
+
+ALTER TABLE [tbl_4_whlr]
+	ADD CONSTRAINT [XPK4_wheeler] PRIMARY KEY  CLUSTERED ([vechicle_id] ASC)
+go
+
+ALTER TABLE [tbl_car_manufacturers_car_models]
+	ADD CONSTRAINT [XPKcar_manufacturers_car_models] PRIMARY KEY  CLUSTERED ([child_table_Identification] ASC)
+go
+
+ALTER TABLE [tbl_cust]
+	ADD CONSTRAINT [XPKCustomer] PRIMARY KEY  CLUSTERED ([cust_identification] ASC)
+go
+
+ALTER TABLE [tbl_prd]
+	ADD CONSTRAINT [XPKProduct] PRIMARY KEY  CLUSTERED ([prd_Identifier] ASC,[prd_Identification] ASC)
+go
+
+ALTER TABLE [tbl_Sales_ord]
+	ADD CONSTRAINT [XPKSales_Order] PRIMARY KEY  CLUSTERED ([prd_Identifier] ASC,[prd_Identification] ASC)
+go
+
+ALTER TABLE [tbl_vhcl_info]
+	ADD CONSTRAINT [XPKVehicle_info] PRIMARY KEY  CLUSTERED ([vechicle_id] ASC)
+go
+
+
+ALTER TABLE [tbl_2_whlr]
+	ADD CONSTRAINT [R_4] FOREIGN KEY ([vechicle_id]) REFERENCES [tbl_vhcl_info]([vechicle_id])
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+go
+
+
+ALTER TABLE [tbl_4_whlr]
+	ADD CONSTRAINT [R_3] FOREIGN KEY ([vechicle_id]) REFERENCES [tbl_vhcl_info]([vechicle_id])
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+go
+
+
+ALTER TABLE [tbl_car_manufacturers_car_models]
+	ADD CONSTRAINT [R_10] FOREIGN KEY ([child_table_Identification]) REFERENCES [mytble_name]([child_table_Identification])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+
+ALTER TABLE [tbl_Sales_ord]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([cust_identification]) REFERENCES [tbl_cust]([cust_identification])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [tbl_Sales_ord]
+	ADD CONSTRAINT [R_2] FOREIGN KEY ([prd_Identifier],[prd_Identification]) REFERENCES [tbl_prd]([prd_Identifier],[prd_Identification])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
 go
