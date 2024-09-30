@@ -1,0 +1,32 @@
+
+CREATE TABLE [ADDR]
+( 
+	[ADDR_identifier]    char(18)  NOT NULL ,
+	[city]               char(18)  NULL ,
+	[Country]            char(18)  NULL ,
+	[zip]                char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [zip_codes]
+( 
+	[zip]                char(18)  NOT NULL ,
+	[zip_code]           char(18)  NULL ,
+	[state]              char(18)  NULL 
+)
+go
+
+ALTER TABLE [ADDR]
+	ADD CONSTRAINT [XPKaddress] PRIMARY KEY  CLUSTERED ([ADDR_identifier] ASC,[zip] ASC)
+go
+
+ALTER TABLE [zip_codes]
+	ADD CONSTRAINT [XPKzip_codes] PRIMARY KEY  CLUSTERED ([zip] ASC)
+go
+
+
+ALTER TABLE [ADDR]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([zip]) REFERENCES [zip_codes]([zip])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
