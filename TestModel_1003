@@ -33,3 +33,8 @@ CREATE TABLE [E_3]
 	[d]                  char(18)  NULL 
 )
 go
+
+
+ALTER TABLE [E_2]
+ADD [new_col]  char(18)  NULL
+go
