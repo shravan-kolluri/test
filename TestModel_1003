@@ -26,3 +26,10 @@ ALTER TABLE [E_2]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+CREATE TABLE [E_3]
+( 
+	[d]                  char(18)  NULL 
+)
+go
