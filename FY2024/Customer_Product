@@ -1,0 +1,92 @@
+
+CREATE TABLE [CUST]
+( 
+	[CUST_ID]            char(18)  NOT NULL ,
+	[CUST_name]          char(18)  NULL ,
+	[Location_ID]        char(18)  NULL 
+)
+go
+
+CREATE TABLE [Location]
+( 
+	[area_ID]            char(18)  NULL ,
+	[city]               char(18)  NULL ,
+	[State]              char(18)  NULL ,
+	[country]            char(18)  NULL ,
+	[Location_ID]        char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [Payment]
+( 
+	[Payment_Number]     integer  NOT NULL ,
+	[Payment_Date]       datetime  NULL 
+	CONSTRAINT [DF__system__date_378152777]
+		 DEFAULT  SYSDATE,
+	[Payment_Amount]     decimal(7,2)  NULL ,
+	[Payment_Type]       char(9)  NULL 
+)
+go
+
+CREATE TABLE [PRD]
+( 
+	[PRD_Identifier]     char(18)  NOT NULL ,
+	[PRD_name]           char(18)  NULL ,
+	[CUST_ID]            char(18)  NOT NULL 
+)
+go
+
+CREATE TABLE [Sales_Order]
+( 
+	[CUST_ID]            char(18)  NULL ,
+	[PRD_Identifier]     char(18)  NULL ,
+	[sales_Order_Number] char(18)  NOT NULL 
+)
+go
+
+ALTER TABLE [CUST]
+	ADD CONSTRAINT [XPKCustomer] PRIMARY KEY  CLUSTERED ([CUST_ID] ASC)
+go
+
+ALTER TABLE [Location]
+	ADD CONSTRAINT [XPKLocation] PRIMARY KEY  CLUSTERED ([Location_ID] ASC)
+go
+
+ALTER TABLE [Payment]
+	ADD CONSTRAINT [XPKPayment] PRIMARY KEY  CLUSTERED ([Payment_Number] ASC)
+go
+
+ALTER TABLE [PRD]
+	ADD CONSTRAINT [XPKProduct] PRIMARY KEY  CLUSTERED ([PRD_Identifier] ASC,[CUST_ID] ASC)
+go
+
+ALTER TABLE [Sales_Order]
+	ADD CONSTRAINT [XPKSales_Order] PRIMARY KEY  CLUSTERED ([sales_Order_Number] ASC)
+go
+
+
+ALTER TABLE [CUST]
+	ADD CONSTRAINT [R_2] FOREIGN KEY ([Location_ID]) REFERENCES [Location]([Location_ID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+
+ALTER TABLE [PRD]
+	ADD CONSTRAINT [R_1] FOREIGN KEY ([CUST_ID]) REFERENCES [CUST]([CUST_ID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+
+ALTER TABLE [Sales_Order]
+	ADD CONSTRAINT [R_3] FOREIGN KEY ([CUST_ID]) REFERENCES [CUST]([CUST_ID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
+
+ALTER TABLE [Sales_Order]
+	ADD CONSTRAINT [R_4] FOREIGN KEY ([PRD_Identifier],[CUST_ID]) REFERENCES [PRD]([PRD_Identifier],[CUST_ID])
+		ON DELETE NO ACTION
+		ON UPDATE NO ACTION
+go
