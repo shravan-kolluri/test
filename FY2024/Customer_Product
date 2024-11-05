@@ -90,3 +90,12 @@ ALTER TABLE [Sales_Order]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
+
+
+ALTER TABLE [Payment]
+ENABLE CHANGE_TRACKING 
+go
+
+ALTER TABLE [Payment]
+ADD [Currency_Id]  char(18)  NULL
+go
